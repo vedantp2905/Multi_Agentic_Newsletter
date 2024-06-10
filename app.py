@@ -76,7 +76,7 @@ def generate_text(llm, topic):
     task_researcher = Task(
         description=(f'Research top 5-6 developments on {topic} from the last two weeks.'),
         agent=researcher_agent,
-        expected_output='List of 5-6 recent developments.',
+        expected_output='List of 5-6 recent developments and their website urls. Scraped content form all urls that can be used further.',
         tools=[search_tool, scrape_tool]
     )
 
@@ -84,7 +84,7 @@ def generate_text(llm, topic):
     task_writer = Task(
         description='Write detailed summaries of the recent developments.',
         agent=writer_agent,
-        expected_output='Summarized content for each development.'
+        expected_output='Summarized content for each development. Each '
     )
 
     # Define Task for Reviewer
