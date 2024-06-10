@@ -1,3 +1,4 @@
+
 import os
 import docx
 import langchain_core
@@ -33,8 +34,8 @@ def generate_text(llm, topic):
 
     # Define Researcher Agent
     researcher_agent = Agent(
-        role='Researcher',
-        goal='Gather top 5-6 developments on the given topic from the last two weeks.',
+        role='Newsletter Content Researcher',
+        goal='Gather latest top 5-6 developments on the given  from the last two weeks and scrape them to undertand the material',
         backstory=("An experienced researcher with strong skills in web scraping and fact-finding."),
         verbose=True,
         allow_delegation=False,
@@ -54,7 +55,7 @@ def generate_text(llm, topic):
     # Define Reviewer Agent
     reviewer_agent = Agent(
         role='Reviewer',
-        goal='Review the written content for accuracy and coherence.',
+        goal='Review and refine content drafts to ensure they meet high standards of quality and impact.',
         backstory='A meticulous reviewer with a keen eye for detail.',
         verbose=True,
         allow_delegation=False,
@@ -73,7 +74,7 @@ def generate_text(llm, topic):
 
     # Define Task for Researcher
     task_researcher = Task(
-        description='Research top 5-6 developments on the topic from the last two weeks.',
+        description=(f'Research top 5-6 developments on {topic} from the last two weeks.'),
         agent=researcher_agent,
         expected_output='List of 5-6 recent developments.',
         tools=[search_tool, scrape_tool]
@@ -161,7 +162,7 @@ def main():
             mod = 'Gemini'
         
         # User input for the blog topic
-        topic = st.text_input("Enter the blog topic:")
+        topic = st.text_input("Enter the newsletter topic:")
 
         if st.button("Generate Newsletter Content"):
             with st.spinner("Generating content..."):
