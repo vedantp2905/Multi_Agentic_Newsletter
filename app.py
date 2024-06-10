@@ -1,5 +1,7 @@
+
 import os
 import docx
+import langchain_core
 from langchain_openai import OpenAI
 import streamlit as st
 from docx import Document
@@ -12,14 +14,10 @@ import google.generativeai as genai
 from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai import Agent, Task, Crew, Process
 from langchain_community.tools import DuckDuckGoSearchRun
-from datetime import datetime, timedelta
 
 # Function to generate text based on topic
 def generate_text(llm, topic):
     inputs = {'topic': topic}
-
-    # Get the date two weeks ago from today
-    two_weeks_ago = datetime.now() - timedelta(weeks=2)
 
     # Initialize DuckDuckGo web search tool
     search_tool = DuckDuckGoSearchRun(
@@ -27,19 +25,17 @@ def generate_text(llm, topic):
         description="""Search the web using DuckDuckGo. Action Input should look like this:
                        {"query": "<Whatever you want to search>"}"""
     )
-
-    # Enhance ScrapeWebsiteTool to filter content by date
+    
     scrape_tool = ScrapeWebsiteTool(
         name="website_scraper",
         description="""Scrape content from web pages. Action Input should look like this:
-                       {"website_url": "<URL of the webpage to scrape>", "date_filter": "YYYY-MM-DD"}""",
-        date_filter=two_weeks_ago.strftime("%Y-%m-%d")
+                       {"website_url": "<URL of the webpage to scrape>"}"""
     )
 
     # Define Researcher Agent
     researcher_agent = Agent(
-        role='Researcher',
-        goal='Gather top 5-6 developments on the given topic from the last two weeks.',
+        role='Newsletter Content Researcher',
+        goal='Gather latest top 5-6 developments on the given  from the last two weeks and scrape them to undertand the material',
         backstory=("An experienced researcher with strong skills in web scraping and fact-finding."),
         verbose=True,
         allow_delegation=False,
@@ -59,7 +55,7 @@ def generate_text(llm, topic):
     # Define Reviewer Agent
     reviewer_agent = Agent(
         role='Reviewer',
-        goal='Review the written content for accuracy and coherence.',
+        goal='Review and refine content drafts to ensure they meet high standards of quality and impact.',
         backstory='A meticulous reviewer with a keen eye for detail.',
         verbose=True,
         allow_delegation=False,
@@ -78,9 +74,9 @@ def generate_text(llm, topic):
 
     # Define Task for Researcher
     task_researcher = Task(
-        description='Research top 5-6 developments on the topic from the last two weeks.',
+        description=(f'Research top 5-6 developments on {topic} from the last two weeks.'),
         agent=researcher_agent,
-        expected_output='List of 5-6 recent developments.',
+        expected_output='List of 5-6 recent developments and their website urls. Scraped content form all urls that can be used further.',
         tools=[search_tool, scrape_tool]
     )
 
@@ -88,7 +84,7 @@ def generate_text(llm, topic):
     task_writer = Task(
         description='Write detailed summaries of the recent developments.',
         agent=writer_agent,
-        expected_output='Summarized content for each development.'
+        expected_output='Summarized content for each development. Each '
     )
 
     # Define Task for Reviewer
@@ -117,6 +113,7 @@ def generate_text(llm, topic):
     result = crew.kickoff(inputs=inputs)
 
     return result
+
 
 # Streamlit web application
 def main():
@@ -165,7 +162,7 @@ def main():
             mod = 'Gemini'
         
         # User input for the blog topic
-        topic = st.text_input("Enter the blog topic:")
+        topic = st.text_input("Enter the newsletter topic:")
 
         if st.button("Generate Newsletter Content"):
             with st.spinner("Generating content..."):
