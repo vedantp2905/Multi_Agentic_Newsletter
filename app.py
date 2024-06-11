@@ -27,13 +27,13 @@ def generate_text(llm, topic):
     scrape_tool = ScrapeWebsiteTool(
         name="website_scraper",
         description="""Scrape content from web pages. Action Input should look like this:
-                       {"website_url": "<URL of the webpage to scrape>", "date_filter": "YYYY-MM-DD"}""",
+                       {"website_url": "<URL of the webpage to scrape>"}""",
     )
 
     # Define Researcher Agent
     researcher_agent = Agent(
         role='Newsletter Content Researcher',
-        goal='Gather latest top 5-6 developments on the given topic from the last two weeks and scrape relevant information.',
+        goal='Search the latest top 5-6 developments on the given topic and scrape relevant information.',
         backstory=("An experienced researcher with strong skills in web scraping, fact-finding, and "
                    "analyzing recent trends to provide up-to-date information for high-quality newsletters."),
         verbose=True,
@@ -76,7 +76,7 @@ def generate_text(llm, topic):
 
     # Define Task for Researcher
     task_researcher = Task(
-        description=(f'Research and identify the top 5-6 developments on the topic of {topic} from the last two weeks. '
+        description=(f'Research and identify the top 5-6 developments on the topic of {topic} '
                      'Scrape detailed content from relevant websites to gather comprehensive material.'),
         agent=researcher_agent,
         expected_output=('A list of 5-6 recent developments with their respective website URLs. '
@@ -133,6 +133,7 @@ def main():
             # User selects the model (Gemini/Cohere) and enters API keys
             model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI'))
             api_key = st.text_input(f'Enter your API key', type="password")
+            replicate_api_token = st.text_input('Enter Replicate API key', type="password")
             submitted = st.form_submit_button("Submit")
 
     # Check if API key is provided and set up the language model accordingly
@@ -165,6 +166,7 @@ def main():
                     temperature=0.6,
                     google_api_key=api_key
                 )
+                print("Gemini Configured")
                 return llm
 
             llm = asyncio.run(setup_gemini())
