@@ -133,7 +133,6 @@ def main():
             # User selects the model (Gemini/Cohere) and enters API keys
             model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI'))
             api_key = st.text_input(f'Enter your API key', type="password")
-            replicate_api_token = st.text_input('Enter Replicate API key', type="password")
             submitted = st.form_submit_button("Submit")
 
     # Check if API key is provided and set up the language model accordingly
