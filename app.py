@@ -46,22 +46,14 @@ def generate_text(llm, topic):
     writer_agent = Agent(
     role='Content Writer',
     goal='Write detailed, engaging, and informative summaries of the developments found by the researcher.',
-    expected_output="""
-        Final newsletter document with all the reviewed summaries, formatted and ready for publication.
-        The newsletter should include:
-        - An introduction with a hook sentence to engage the reader.
-        - A contents section summarizing each story in one sentence.
-        - Main content sections for each of the 5-6 developments/stories, each including:
-            - A small introduction.
-            - Details in 3-4 bullet points.
-            - Explanation of why it matters/call to action, if necessary.
-            - Links to sources.
-        - A conclusion summarizing all content.
-    """,
+    backstory=("An experienced writer with a background in journalism and content creation. "
+                "Skilled in crafting compelling narratives and distilling complex information into "
+                "accessible formats. Adept at conducting research and synthesizing insights for engaging content."),
     verbose=True,
     allow_delegation=False,
     llm=llm
 )
+
 
 
     # Define Reviewer Agent
