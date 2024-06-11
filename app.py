@@ -107,8 +107,17 @@ def generate_text(llm, topic):
         description=('Compile the reviewed and refined content into a well-structured newsletter format. '
                      'Ensure the newsletter is visually appealing and flows logically from one section to the next.'),
         agent=final_writer_agent,
-        expected_output=('Final newsletter document with all the reviewed summaries, formatted and ready for publication. '
-                         'The newsletter should include an introduction, main content sections, and a conclusion.')
+        expected_output=("""Final newsletter document with all the reviewed summaries, formatted and ready for publication. '
+                         'The newsletter should include an introduction
+                         , Contents section, main content sections, and a conclusion.
+                         The Introduction should have a hookup sentence which will
+                         make the reader read the entire newsletter.
+                         The contents section should have what all stories we 
+                         will be covering in the newsletter in just one sentence for each stuff.
+                         The main content should have all the 5-6 developments/stories with each
+                         of them having a small intoduction, details in 3-4 bullet points, why it matters/call to action as necessary and links to all. 
+                         A final conclusion going over all content
+                         """)
     )
 
     # Initialize Crew
