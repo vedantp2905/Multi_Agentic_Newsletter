@@ -1,4 +1,3 @@
-import os
 import requests
 
 from typing import Type, Any
@@ -47,5 +46,9 @@ class SerpApiGoogleSearchTool(BaseTool):
             summary += str(results['knowledge_graph'])
         elif 'top_stories' in results:
             summary += str(results['top_stories'])
-
+        
+        print(summary)
+        
         return summary
+
+
