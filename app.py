@@ -30,27 +30,39 @@ def generate_text(llm, topic):
                        {"website_url": "<URL of the webpage to scrape>"}""",
     )
 
-    # Define Researcher Agent
     researcher_agent = Agent(
-        role='Newsletter Content Researcher',
-        goal='Search the latest top 5-6 developments on the given topic and scrape relevant information.',
-        backstory=("An experienced researcher with strong skills in web scraping, fact-finding, and "
-                   "analyzing recent trends to provide up-to-date information for high-quality newsletters."),
-        verbose=True,
-        allow_delegation=False,
-        llm=llm
-    )
+    role='Newsletter Content Researcher',
+    goal='Search the latest top 5 developments on the given topic, find unique 5 URLs containing the developments, and scrape relevant information from these URLs.',
+    backstory=(
+        "An experienced researcher with strong skills in web scraping, fact-finding, and "
+        "analyzing recent trends to provide up-to-date information for high-quality newsletters."
+    ),
+    verbose=True,
+    allow_delegation=False,
+    llm=llm
+)
 
-    # Define Writer Agent
+
     writer_agent = Agent(
-        role='Content Writer',
-        goal='Write detailed, engaging, and informative summaries of the developments found by the researcher.',
-        backstory=("A skilled writer with a background in journalism and content creation, adept at transforming "
-                   "raw data into compelling narratives and ensuring clarity and engagement in every piece."),
-        verbose=True,
-        allow_delegation=False,
-        llm=llm
-    )
+    role='Content Writer',
+    goal='Write detailed, engaging, and informative summaries of the developments found by the researcher.',
+    expected_output="""
+        Final newsletter document with all the reviewed summaries, formatted and ready for publication.
+        The newsletter should include:
+        - An introduction with a hook sentence to engage the reader.
+        - A contents section summarizing each story in one sentence.
+        - Main content sections for each of the 5-6 developments/stories, each including:
+            - A small introduction.
+            - Details in 3-4 bullet points.
+            - Explanation of why it matters/call to action, if necessary.
+            - Links to sources.
+        - A conclusion summarizing all content.
+    """,
+    verbose=True,
+    allow_delegation=False,
+    llm=llm
+)
+
 
     # Define Reviewer Agent
     reviewer_agent = Agent(
@@ -62,18 +74,7 @@ def generate_text(llm, topic):
         allow_delegation=False,
         llm=llm
     )
-
-    # Define Final Writer Agent
-    final_writer_agent = Agent(
-        role='Final Editor',
-        goal='Compile the reviewed content into a well-structured and polished newsletter.',
-        backstory=("An experienced editor skilled in synthesizing various content pieces into a cohesive whole, "
-                   "ensuring the final document is engaging, informative, and visually appealing."),
-        verbose=True,
-        allow_delegation=False,
-        llm=llm
-    )
-
+    
     # Define Task for Researcher
     task_researcher = Task(
         description=(f'Research and identify the top 5-6 developments on the topic of {topic} '
@@ -106,7 +107,7 @@ def generate_text(llm, topic):
     task_final_writer = Task(
         description=('Compile the reviewed and refined content into a well-structured newsletter format. '
                      'Ensure the newsletter is visually appealing and flows logically from one section to the next.'),
-        agent=final_writer_agent,
+        agent=writer_agent,
         expected_output=("""Final newsletter document with all the reviewed summaries, formatted and ready for publication. '
                          'The newsletter should include an introduction
                          , Contents section, main content sections, and a conclusion.
@@ -122,7 +123,7 @@ def generate_text(llm, topic):
 
     # Initialize Crew
     crew = Crew(
-        agents=[researcher_agent, writer_agent, reviewer_agent, final_writer_agent],
+        agents=[researcher_agent, writer_agent, reviewer_agent, writer_agent],
         tasks=[task_researcher, task_writer, task_reviewer, task_final_writer],
         verbose=2,
         context={"Blog Topic is ": topic}
