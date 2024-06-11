@@ -80,7 +80,8 @@ def generate_text(llm, topic):
                      'Scrape detailed content from relevant websites to gather comprehensive material.'),
         agent=researcher_agent,
         expected_output=('A list of 5-6 recent developments with their respective website URLs. '
-                         'Scraped content from all URLs that can be used further by the writer.')
+                         'Scraped content from all URLs that can be used further by the writer.'),
+        tools = [search_tool,scrape_tool]
     )
 
     # Define Task for Writer
