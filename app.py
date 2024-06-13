@@ -15,8 +15,8 @@ from serpapi_google_search_tool import SerpApiGoogleSearchTool
 def generate_text(llm, topic, serpapi_key):
     inputs = {'topic': topic}
 
-    search_tool = SerpApiGoogleSearchTool(api_key=serpapi_key)
-
+    search_tool = SerpApiGoogleSearchTool(serpapi_key)
+    
     # Enhance ScrapeWebsiteTool to filter content by date
     scrape_tool = ScrapeWebsiteTool(
         name="website_scraper",
@@ -118,10 +118,10 @@ def main():
         with st.form('Gemini/OpenAI'):
             model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI'))
             api_key = st.text_input(f'Enter your API key', type="password")
-            serpapi_key = st.text_input(f'Enter your SerpAPI key', type="password")
+            serp_api_key = st.text_input(f'Enter your SerpAPI key', type="password")
             submitted = st.form_submit_button("Submit")
 
-    if api_key and serpapi_key:
+    if api_key and serp_api_key:
         if model == 'OpenAI':
             async def setup_OpenAI():
                 loop = asyncio.get_event_loop()
@@ -160,7 +160,7 @@ def main():
 
         if st.button("Generate Newsletter Content"):
             with st.spinner("Generating content..."):
-                generated_content = generate_text(llm, topic, serpapi_key)
+                generated_content = generate_text(llm, topic, serp_api_key)
 
                 content_lines = generated_content.split('\n')
                 first_line = content_lines[0]
