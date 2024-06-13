@@ -12,9 +12,9 @@ class SerpApiGoogleSearchTool(BaseTool):
     description: str = "Search the internet"
     args_schema: Type[BaseModel] = SerpApiGoogleSearchToolSchema
     search_url: str = "https://serpapi.com/search"
-
-    def __init__(self, api_key: str):
-        self.api_key = api_key
+    
+    def __init__(self, serp_api_key):
+        self.api_key = serp_api_key
 
     def _run(
         self,
