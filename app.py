@@ -12,7 +12,6 @@ from crewai_tools.tools.base_tool import BaseTool
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai import Agent, Task, Crew, Process
-from serpapi_google_search_tool import SerpApiGoogleSearchTool
 
 serp_api_key=''
 class SerpApiGoogleSearchToolSchema(BaseModel):
@@ -107,6 +106,21 @@ def generate_text(llm, topic, serpapi_key):
         llm=llm
     )
     
+    final_writer_agent = Agent(
+        role='Final Content Writer ',
+        goal="""Goal: Compile, refine, and structure all reviewed and approved content into a cohesive and engaging newsletter format. 
+            Ensure that the final product is polished, logically structured, and ready for publication, providing a seamless and informative\
+            reading experience for the audience.""",
+            
+        backstory="""An accomplished writer and editor with extensive experience in journalism, content creation, and editorial management.
+                   Known for their ability to craft compelling narratives and ensure consistency and quality across all sections of a publication.
+                   With a keen eye for detail and a deep understanding of audience engagement, this writer excels in transforming raw content into
+                   polished, professional-grade newsletters that captivate readers and deliver clear, valuable insights.""",
+        verbose=True,
+        allow_delegation=False,
+        llm=llm
+    )
+    
     task_researcher = Task(
         description=(f'Research and identify the top 5-6 developments on the topic of {topic} '
                      'Scrape detailed content from relevant websites to gather comprehensive material.'),
@@ -157,7 +171,7 @@ def generate_text(llm, topic, serpapi_key):
 
 
     crew = Crew(
-        agents=[researcher_agent, writer_agent, reviewer_agent, writer_agent],
+        agents=[researcher_agent, writer_agent, reviewer_agent, final_writer_agent],
         tasks=[task_researcher, task_writer, task_reviewer, task_final_writer],
         verbose=2,
         context={"Blog Topic is ": topic}
