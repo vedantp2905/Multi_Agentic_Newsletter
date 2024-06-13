@@ -7,11 +7,9 @@ from io import BytesIO
 from crewai_tools import ScrapeWebsiteTool
 
 import asyncio
-import google.generativeai as genai
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai import Agent, Task, Crew, Process
-from langchain_community.tools import DuckDuckGoSearchRun
 from serpapi_google_search_tool import SerpApiGoogleSearchTool
 
 # Function to generate text based on topic
@@ -19,7 +17,6 @@ def generate_text(llm, topic):
     inputs = {'topic': topic}
 
 
-    # Initialize DuckDuckGo web search tool
     search_tool = SerpApiGoogleSearchTool()
      
 
@@ -147,7 +144,7 @@ def main():
                     asyncio.set_event_loop(loop)
 
                 os.environ["OPENAI_API_KEY"] = api_key
-                llm = OpenAI(model='gpt-3.5-turbo-instruct', temperature=0.6,max_tokens=8192)
+                llm = OpenAI(model='gpt-4-turbo', temperature=0.6,max_tokens=20000)
                 print("Configured OpenAI model:", llm)
                 return llm
 
