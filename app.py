@@ -5,19 +5,71 @@ from docx import Document
 from io import BytesIO
 from crewai_tools import ScrapeWebsiteTool
 import asyncio
-
+import requests
+from typing import Type, Any
+from pydantic.v1 import BaseModel, Field
+from crewai_tools.tools.base_tool import BaseTool
 from langchain_openai import OpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai import Agent, Task, Crew, Process
 from serpapi_google_search_tool import SerpApiGoogleSearchTool
 
+serp_api_key=''
+
+
+class SerpApiGoogleSearchToolSchema(BaseModel):
+    q: str = Field(..., description="Parameter defines the query you want to search. You can use anything that you would use in a regular Google search. e.g. inurl:, site:, intitle:.")
+    tbs: str = Field("qdr:w2", description="Time filter to limit the search to the last two weeks.")
+
+class SerpApiGoogleSearchTool(BaseTool):
+    name: str = "Google Search"
+    description: str = "Search the internet"
+    args_schema: Type[BaseModel] = SerpApiGoogleSearchToolSchema
+    search_url: str = "https://serpapi.com/search"
+    
+    def _run(
+        self,
+        q: str,
+        tbs: str = "qdr:w2",
+        **kwargs: Any,
+    ) -> Any:
+        payload = {
+            "engine": "google",
+            "q": q,
+            "tbs": tbs,
+            "api_key": serp_api_key,
+        }
+        headers = {
+            'content-type': 'application/json'
+        }
+    
+        response = requests.get(self.search_url, headers=headers, params=payload)
+        results = response.json()
+    
+        summary = ""
+        if 'answer_box_list' in results:
+            summary += str(results['answer_box_list'])
+        elif 'answer_box' in results:
+            summary += str(results['answer_box'])
+        elif 'organic_results' in results:
+            summary += str(results['organic_results'])
+        elif 'sports_results' in results:
+            summary += str(results['sports_results'])
+        elif 'knowledge_graph' in results:
+            summary += str(results['knowledge_graph'])
+        elif 'top_stories' in results:
+            summary += str(results['top_stories'])
+        
+        print(summary)
+        
+        return summary
+    
 # Function to generate text based on topic
 def generate_text(llm, topic, serpapi_key):
     inputs = {'topic': topic}
-
-    search_tool = SerpApiGoogleSearchTool(serpapi_key)
+    search_tool = SerpApiGoogleSearchTool()
     
-    # Enhance ScrapeWebsiteTool to filter content by date
+# Enhance ScrapeWebsiteTool to filter content by date
     scrape_tool = ScrapeWebsiteTool(
         name="website_scraper",
         description="""Scrape content from web pages. Action Input should look like this:
@@ -110,10 +162,12 @@ def generate_text(llm, topic, serpapi_key):
 
     return result
 
+
 # Streamlit web application
 def main():
     st.header('AI Newsletter Content Generator')
     mod = None
+    global serp_api_key
     with st.sidebar:
         with st.form('Gemini/OpenAI'):
             model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI'))
