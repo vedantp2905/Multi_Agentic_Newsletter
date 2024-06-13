@@ -9,14 +9,12 @@ import requests
 from typing import Type, Any
 from pydantic.v1 import BaseModel, Field
 from crewai_tools.tools.base_tool import BaseTool
-from langchain_openai import OpenAI
+from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai import Agent, Task, Crew, Process
 from serpapi_google_search_tool import SerpApiGoogleSearchTool
 
 serp_api_key=''
-
-
 class SerpApiGoogleSearchToolSchema(BaseModel):
     q: str = Field(..., description="Parameter defines the query you want to search. You can use anything that you would use in a regular Google search. e.g. inurl:, site:, intitle:.")
     tbs: str = Field("qdr:w2", description="Time filter to limit the search to the last two weeks.")
@@ -184,7 +182,7 @@ def main():
                     asyncio.set_event_loop(loop)
 
                 os.environ["OPENAI_API_KEY"] = api_key
-                llm = OpenAI(model='gpt-3.5-turbo', temperature=0.6, max_tokens=20000)
+                llm = ChatOpenAI(model='gpt-3.5-turbo-instruct', temperature=0.6, max_tokens=3500)
                 print("Configured OpenAI model:", llm)
                 return llm
 
@@ -199,7 +197,7 @@ def main():
                     asyncio.set_event_loop(loop)
 
                 llm = ChatGoogleGenerativeAI(
-                    model="gemini-1.5-flash",
+                    model="gemini-pro",
                     verbose=True,
                     temperature=0.6,
                     google_api_key=api_key
