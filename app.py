@@ -170,7 +170,7 @@ def main():
   "max_output_tokens": 8192,
   "response_mime_type": "text/plain",
 }
-                model = genai.GenerativeModel(
+                llm = genai.GenerativeModel(
   model_name="gemini-1.5-flash",
   generation_config=generation_config,
 )
