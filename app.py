@@ -147,7 +147,7 @@ def main():
                     asyncio.set_event_loop(loop)
 
                 os.environ["OPENAI_API_KEY"] = api_key
-                llm = OpenAI(model='gpt-3.5-turbo-instruct', temperature=0.6)
+                llm = OpenAI(model='gpt-3.5-turbo-instruct', temperature=0.6,max_tokens=8192)
                 print("Configured OpenAI model:", llm)
                 return llm
 
@@ -161,12 +161,20 @@ def main():
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
 
-                llm = ChatGoogleGenerativeAI(
-                    model="gemini-1.5-flash",
-                    verbose=True,
-                    temperature=0.6,
-                    google_api_key=api_key
-                )
+                genai.configure(api_key=os.environ[api_key])
+                
+                generation_config = {
+"temperature": 0.6,
+  "top_p": 0.95,
+  "top_k": 64,
+  "max_output_tokens": 8192,
+  "response_mime_type": "text/plain",
+}
+                model = genai.GenerativeModel(
+  model_name="gemini-1.5-flash",
+  generation_config=generation_config,
+)
+
                 print("Gemini Configured")
                 return llm
 
