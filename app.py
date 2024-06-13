@@ -13,8 +13,7 @@ from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai import Agent, Task, Crew, Process
 
-serp_api_key = ''
-
+serp_api_key=''
 class SerpApiGoogleSearchToolSchema(BaseModel):
     q: str = Field(..., description="Parameter defines the query you want to search. You can use anything that you would use in a regular Google search. e.g. inurl:, site:, intitle:.")
     tbs: str = Field("qdr:w2", description="Time filter to limit the search to the last two weeks.")
@@ -67,7 +66,7 @@ def generate_text(llm, topic, serpapi_key):
     inputs = {'topic': topic}
     search_tool = SerpApiGoogleSearchTool()
     
-    # Enhance ScrapeWebsiteTool to filter content by date
+# Enhance ScrapeWebsiteTool to filter content by date
     scrape_tool = ScrapeWebsiteTool(
         name="website_scraper",
         description="""Scrape content from web pages. Action Input should look like this:
@@ -166,6 +165,7 @@ def generate_text(llm, topic, serpapi_key):
         )
     )
 
+
     crew = Crew(
         agents=[researcher_agent, writer_agent, reviewer_agent, final_writer_agent],
         tasks=[task_researcher, task_writer, task_reviewer, task_final_writer],
@@ -214,7 +214,7 @@ def main():
                     asyncio.set_event_loop(loop)
 
                 llm = ChatGoogleGenerativeAI(
-                    model="gemini-pro",
+                    model="gemini-1.5-flash",
                     verbose=True,
                     temperature=0.6,
                     google_api_key=api_key
@@ -228,4 +228,32 @@ def main():
         topic = st.text_input("Enter the blog topic:")
 
         if st.button("Generate Newsletter Content"):
-            with
+            with st.spinner("Generating content..."):
+                generated_content = generate_text(llm, topic, serp_api_key)
+
+                content_lines = generated_content.split('\n')
+                first_line = content_lines[0]
+                remaining_content = '\n'.join(content_lines[1:])
+
+                st.markdown(first_line)
+                st.markdown(remaining_content)
+
+                doc = Document()
+
+                doc.add_heading(topic, 0)
+                doc.add_paragraph(first_line)
+                doc.add_paragraph(remaining_content)
+
+                buffer = BytesIO()
+                doc.save(buffer)
+                buffer.seek(0)
+
+                st.download_button(
+                    label="Download as Word Document",
+                    data=buffer,
+                    file_name=f"{topic}.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                )
+
+if __name__ == "__main__":
+    main()
