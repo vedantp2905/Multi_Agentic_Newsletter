@@ -1,24 +1,23 @@
+# app.py
+
 import os
 import docx
-from langchain_openai import OpenAI
 import streamlit as st
 from docx import Document
 from io import BytesIO
 from crewai_tools import ScrapeWebsiteTool
-
 import asyncio
 
+from langchain_openai import OpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai import Agent, Task, Crew, Process
 from serpapi_google_search_tool import SerpApiGoogleSearchTool
 
 # Function to generate text based on topic
-def generate_text(llm, topic):
+def generate_text(llm, topic, serpapi_key):
     inputs = {'topic': topic}
 
-
-    search_tool = SerpApiGoogleSearchTool()
-     
+    search_tool = SerpApiGoogleSearchTool(api_key=serpapi_key)
 
     # Enhance ScrapeWebsiteTool to filter content by date
     scrape_tool = ScrapeWebsiteTool(
@@ -39,7 +38,6 @@ def generate_text(llm, topic):
     llm=llm
 )
 
-
     writer_agent = Agent(
     role='Content Writer',
     goal='Write detailed, engaging, and informative summaries of the developments found by the researcher.',
@@ -51,9 +49,6 @@ def generate_text(llm, topic):
     llm=llm
 )
 
-
-
-    # Define Reviewer Agent
     reviewer_agent = Agent(
         role='Content Reviewer',
         goal='Review and refine content drafts to ensure they meet high standards of quality and impact.',
@@ -64,7 +59,6 @@ def generate_text(llm, topic):
         llm=llm
     )
     
-    # Define Task for Researcher
     task_researcher = Task(
         description=(f'Research and identify the top 5-6 developments on the topic of {topic} '
                      'Scrape detailed content from relevant websites to gather comprehensive material.'),
@@ -74,7 +68,6 @@ def generate_text(llm, topic):
         tools = [search_tool,scrape_tool]
     )
 
-    # Define Task for Writer
     task_writer = Task(
         description=('Write detailed summaries of the recent developments identified by the researcher. '
                      'Ensure each summary is informative, engaging, and provides clear insights into the development.'),
@@ -83,7 +76,6 @@ def generate_text(llm, topic):
                          'with clear and concise information.')
     )
 
-    # Define Task for Reviewer
     task_reviewer = Task(
         description=('Review the summarized content provided by the writer for accuracy, coherence, and quality. '
                      'Ensure that the content is free from errors and meets the publication standards.'),
@@ -92,7 +84,6 @@ def generate_text(llm, topic):
                          'Final versions of summaries that are ready for inclusion in the newsletter.')
     )
 
-    # Define Task for Final Writer
     task_final_writer = Task(
         description=('Compile the reviewed and refined content into a well-structured newsletter format. '
                      'Ensure the newsletter is visually appealing and flows logically from one section to the next.'),
@@ -110,7 +101,6 @@ def generate_text(llm, topic):
                          """)
     )
 
-    # Initialize Crew
     crew = Crew(
         agents=[researcher_agent, writer_agent, reviewer_agent, writer_agent],
         tasks=[task_researcher, task_writer, task_reviewer, task_final_writer],
@@ -118,7 +108,6 @@ def generate_text(llm, topic):
         context={"Blog Topic is ": topic}
     )
 
-    # Start the workflow and generate the result
     result = crew.kickoff(inputs=inputs)
 
     return result
@@ -129,14 +118,12 @@ def main():
     mod = None
     with st.sidebar:
         with st.form('Gemini/OpenAI'):
-            # User selects the model (Gemini/Cohere) and enters API keys
             model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI'))
-            api_key = st.text_input(f'Enter your API key', type="password")            
-            serp_api_key = st.text_input(f'Enter your SERP API key', type="password")
+            api_key = st.text_input(f'Enter your API key', type="password")
+            serpapi_key = st.text_input(f'Enter your SerpAPI key', type="password")
             submitted = st.form_submit_button("Submit")
 
-    # Check if API key is provided and set up the language model accordingly
-    if api_key:
+    if api_key and serpapi_key:
         if model == 'OpenAI':
             async def setup_OpenAI():
                 loop = asyncio.get_event_loop()
@@ -145,7 +132,7 @@ def main():
                     asyncio.set_event_loop(loop)
 
                 os.environ["OPENAI_API_KEY"] = api_key
-                llm = OpenAI(model='gpt-3.5-turbo', temperature=0.6,max_tokens=20000)
+                llm = OpenAI(model='gpt-3.5-turbo', temperature=0.6, max_tokens=20000)
                 print("Configured OpenAI model:", llm)
                 return llm
 
@@ -171,12 +158,11 @@ def main():
             llm = asyncio.run(setup_gemini())
             mod = 'Gemini'
         
-        # User input for the blog topic
         topic = st.text_input("Enter the blog topic:")
 
         if st.button("Generate Newsletter Content"):
             with st.spinner("Generating content..."):
-                generated_content = generate_text(llm, topic)
+                generated_content = generate_text(llm, topic, serpapi_key)
 
                 content_lines = generated_content.split('\n')
                 first_line = content_lines[0]
@@ -187,7 +173,6 @@ def main():
 
                 doc = Document()
 
-                # Option to download content as a Word document
                 doc.add_heading(topic, 0)
                 doc.add_paragraph(first_line)
                 doc.add_paragraph(remaining_content)
