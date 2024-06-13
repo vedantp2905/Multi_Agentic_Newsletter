@@ -88,7 +88,7 @@ def generate_text(llm, topic, serpapi_key):
 
     writer_agent = Agent(
         role='Content Writer',
-        goal='Write detailed, engaging, and informative summaries of the developments found by the researcher.',
+        goal='Write detailed, engaging, and informative summaries of the developments found by the researcher using the format specified.',
         backstory=("An experienced writer with a background in journalism and content creation. "
                     "Skilled in crafting compelling narratives and distilling complex information into "
                     "accessible formats. Adept at conducting research and synthesizing insights for engaging content."),
@@ -99,7 +99,7 @@ def generate_text(llm, topic, serpapi_key):
 
     reviewer_agent = Agent(
         role='Content Reviewer',
-        goal='Review and refine content drafts to ensure they meet high standards of quality and impact.',
+        goal='Review and refine content drafts to ensure they meet high standards of quality and impact like major newsletters.',
         backstory=("A meticulous reviewer with extensive experience in editing and proofreading, "
                    "known for their keen eye for detail and commitment to maintaining the highest quality standards in published content."),
         verbose=True,
@@ -111,7 +111,7 @@ def generate_text(llm, topic, serpapi_key):
         description=(f'Research and identify the top 5-6 developments on the topic of {topic} '
                      'Scrape detailed content from relevant websites to gather comprehensive material.'),
         agent=researcher_agent,
-        expected_output=('A list of 5-6 recent developments with their respective website URLs. '
+        expected_output=('A list of 3-4 recent developments and 2 stories from more than a week ago with their respective website URLs. '
                          'Scraped content from all URLs that can be used further by the writer.'),
         tools=[search_tool, scrape_tool]
     )
@@ -120,7 +120,7 @@ def generate_text(llm, topic, serpapi_key):
         description=('Write detailed summaries of the recent developments identified by the researcher. '
                      'Ensure each summary is informative, engaging, and provides clear insights into the development.'),
         agent=writer_agent,
-        expected_output=('Summarized content for each of the 5-6 developments, each summary being 150-200 words long, '
+        expected_output=('Summarized content for all the stories, each summary being 150-200 words long, '
                          'with clear and concise information.')
     )
 
@@ -133,21 +133,28 @@ def generate_text(llm, topic, serpapi_key):
     )
 
     task_final_writer = Task(
-        description=('Compile the reviewed and refined content into a well-structured newsletter format. '
-                     'Ensure the newsletter is visually appealing and flows logically from one section to the next.'),
-        agent=writer_agent,
-        expected_output=("""Final newsletter document with all the reviewed summaries, formatted and ready for publication. '
-                         'The newsletter should include an introduction
-                         , Contents section, main content sections, and a conclusion.
-                         The Introduction should have a hookup sentence which will
-                         make the reader read the entire newsletter.
-                         The contents section should have what all stories we 
-                         will be covering in the newsletter in just one sentence for each stuff.
-                         The main content should have all the 5-6 developments/stories with each
-                         of them having a small intoduction, details in 3-4 bullet points, why it matters/call to action as necessary and links to all. 
-                         A final conclusion going over all content
-                         """)
+    description=('Compile the reviewed and refined content into a well-structured newsletter format. '
+                 'Ensure the newsletter is visually appealing and flows logically from one section to the next.'),
+    agent=writer_agent,
+    expected_output=(
+        """Final newsletter document with all the reviewed summaries, formatted and ready for publication. 
+        The newsletter should include:
+        - Introduction:
+            - A compelling hook sentence to engage readers and encourage them to read the entire newsletter.
+        - Contents section:
+            - Summarize each story or development in one interesting sentence.
+        - Main content sections (5-6 developments/stories):
+            - Each story should have:
+                - A small introduction.
+                - Details presented in 3-4 bullet points.
+                - Explanation of why it matters or a call to action
+                - Links to relevant sources or additional information.
+        - Conclusion:
+            - Wrap up the newsletter by summarizing all content and providing a final thought or conclusion.
+        """
     )
+)
+
 
     crew = Crew(
         agents=[researcher_agent, writer_agent, reviewer_agent, writer_agent],
@@ -197,7 +204,7 @@ def main():
                     asyncio.set_event_loop(loop)
 
                 llm = ChatGoogleGenerativeAI(
-                    model="gemini-1.5-flash",
+                    model="gemini-pro",
                     verbose=True,
                     temperature=0.6,
                     google_api_key=api_key
