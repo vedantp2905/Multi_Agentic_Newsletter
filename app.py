@@ -160,21 +160,13 @@ def main():
                 if loop is None:
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
-                
-                genai.configure(api_key=api_key)
-                
-                generation_config = {
-"temperature": 0.6,
-  "top_p": 0.95,
-  "top_k": 64,
-  "max_output_tokens": 8192,
-  "response_mime_type": "text/plain",
-}
-                llm = genai.GenerativeModel(
-  model_name="gemini-1.5-flash",
-  generation_config=generation_config,
-)
 
+                llm = ChatGoogleGenerativeAI(
+                    model="gemini-1.5-flash",
+                    verbose=True,
+                    temperature=0.6,
+                    google_api_key=api_key
+                )
                 print("Gemini Configured")
                 return llm
 
@@ -182,7 +174,7 @@ def main():
             mod = 'Gemini'
         
         # User input for the blog topic
-        topic = st.text_input("Enter the newsletter topic:")
+        topic = st.text_input("Enter the blog topic:")
 
         if st.button("Generate Newsletter Content"):
             with st.spinner("Generating content..."):
