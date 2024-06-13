@@ -13,7 +13,8 @@ from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai import Agent, Task, Crew, Process
 
-serp_api_key=''
+serp_api_key = ''
+
 class SerpApiGoogleSearchToolSchema(BaseModel):
     q: str = Field(..., description="Parameter defines the query you want to search. You can use anything that you would use in a regular Google search. e.g. inurl:, site:, intitle:.")
     tbs: str = Field("qdr:w2", description="Time filter to limit the search to the last two weeks.")
@@ -66,7 +67,7 @@ def generate_text(llm, topic, serpapi_key):
     inputs = {'topic': topic}
     search_tool = SerpApiGoogleSearchTool()
     
-# Enhance ScrapeWebsiteTool to filter content by date
+    # Enhance ScrapeWebsiteTool to filter content by date
     scrape_tool = ScrapeWebsiteTool(
         name="website_scraper",
         description="""Scrape content from web pages. Action Input should look like this:
@@ -89,8 +90,8 @@ def generate_text(llm, topic, serpapi_key):
         role='Content Writer',
         goal='Write detailed, engaging, and informative summaries of the developments found by the researcher using the format specified.',
         backstory=("An experienced writer with a background in journalism and content creation. "
-                    "Skilled in crafting compelling narratives and distilling complex information into "
-                    "accessible formats. Adept at conducting research and synthesizing insights for engaging content."),
+                   "Skilled in crafting compelling narratives and distilling complex information into "
+                   "accessible formats. Adept at conducting research and synthesizing insights for engaging content."),
         verbose=True,
         allow_delegation=False,
         llm=llm
@@ -107,15 +108,11 @@ def generate_text(llm, topic, serpapi_key):
     )
     
     final_writer_agent = Agent(
-        role='Final Content Writer ',
-        goal="""Goal: Compile, refine, and structure all reviewed and approved content into a cohesive and engaging newsletter format. 
-            Ensure that the final product is polished, logically structured, and ready for publication, providing a seamless and informative\
-            reading experience for the audience.""",
-            
-        backstory="""An accomplished writer and editor with extensive experience in journalism, content creation, and editorial management.
-                   Known for their ability to craft compelling narratives and ensure consistency and quality across all sections of a publication.
-                   With a keen eye for detail and a deep understanding of audience engagement, this writer excels in transforming raw content into
-                   polished, professional-grade newsletters that captivate readers and deliver clear, valuable insights.""",
+        role='Final Content Writer',
+        goal='Compile, refine, and structure all reviewed and approved content into a cohesive and engaging newsletter format. Ensure that the final product is polished, logically structured, and ready for publication, providing a seamless and informative reading experience for the audience.',
+        backstory=("An accomplished writer and editor with extensive experience in journalism, content creation, and editorial management. "
+                   "Known for their ability to craft compelling narratives and ensure consistency and quality across all sections of a publication. "
+                   "With a keen eye for detail and a deep understanding of audience engagement, this writer excels in transforming raw content into polished, professional-grade newsletters that captivate readers and deliver clear, valuable insights."),
         verbose=True,
         allow_delegation=False,
         llm=llm
@@ -147,28 +144,27 @@ def generate_text(llm, topic, serpapi_key):
     )
 
     task_final_writer = Task(
-    description=('Compile the reviewed and refined content into a well-structured newsletter format. '
-                 'Ensure the newsletter is visually appealing and flows logically from one section to the next.'),
-    agent=writer_agent,
-    expected_output=(
-        """Final newsletter document with all the reviewed summaries, formatted and ready for publication. 
-        The newsletter should include:
-        - Introduction:
-            - A compelling hook sentence to engage readers and encourage them to read the entire newsletter.
-        - Contents section:
-            - Summarize each story or development in one interesting sentence.
-        - Main content sections (5-6 developments/stories):
-            - Each story should have:
-                - A small introduction.
-                - Details presented in 3-4 bullet points.
-                - Explanation of why it matters or a call to action
-                - Links to relevant sources or additional information.
-        - Conclusion:
-            - Wrap up the newsletter by summarizing all content and providing a final thought or conclusion.
-        """
+        description=('Compile the reviewed and refined content into a well-structured newsletter format. '
+                     'Ensure the newsletter is visually appealing and flows logically from one section to the next.'),
+        agent=final_writer_agent,
+        expected_output=(
+            """Final newsletter document with all the reviewed summaries, formatted and ready for publication. 
+            The newsletter should include:
+            - Introduction:
+                - A compelling hook sentence to engage readers and encourage them to read the entire newsletter.
+            - Contents section:
+                - Summarize each story or development in one interesting sentence.
+            - Main content sections (5-6 developments/stories):
+                - Each story should have:
+                    - A small introduction.
+                    - Details presented in 3-4 bullet points.
+                    - Explanation of why it matters or a call to action
+                    - Links to relevant sources or additional information.
+            - Conclusion:
+                - Wrap up the newsletter by summarizing all content and providing a final thought or conclusion.
+            """
+        )
     )
-)
-
 
     crew = Crew(
         agents=[researcher_agent, writer_agent, reviewer_agent, final_writer_agent],
@@ -232,32 +228,4 @@ def main():
         topic = st.text_input("Enter the blog topic:")
 
         if st.button("Generate Newsletter Content"):
-            with st.spinner("Generating content..."):
-                generated_content = generate_text(llm, topic, serp_api_key)
-
-                content_lines = generated_content.split('\n')
-                first_line = content_lines[0]
-                remaining_content = '\n'.join(content_lines[1:])
-
-                st.markdown(first_line)
-                st.markdown(remaining_content)
-
-                doc = Document()
-
-                doc.add_heading(topic, 0)
-                doc.add_paragraph(first_line)
-                doc.add_paragraph(remaining_content)
-
-                buffer = BytesIO()
-                doc.save(buffer)
-                buffer.seek(0)
-
-                st.download_button(
-                    label="Download as Word Document",
-                    data=buffer,
-                    file_name=f"{topic}.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                )
-
-if __name__ == "__main__":
-    main()
+            with
