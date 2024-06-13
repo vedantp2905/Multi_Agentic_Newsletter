@@ -1,5 +1,3 @@
-# serpapi_google_search_tool.py
-
 import requests
 from typing import Type, Any
 from pydantic.v1 import BaseModel, Field
@@ -34,7 +32,7 @@ class SerpApiGoogleSearchTool(BaseTool):
             'content-type': 'application/json'
         }
     
-        response = requests.request("GET", self.search_url, headers=headers, params=payload)
+        response = requests.get(self.search_url, headers=headers, params=payload)
         results = response.json()
     
         summary = ""
