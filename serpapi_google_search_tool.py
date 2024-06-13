@@ -1,6 +1,6 @@
-import requests
-from app import serp_api_key
+# serpapi_google_search_tool.py
 
+import requests
 from typing import Type, Any
 from pydantic.v1 import BaseModel, Field
 from crewai_tools.tools.base_tool import BaseTool
@@ -15,6 +15,9 @@ class SerpApiGoogleSearchTool(BaseTool):
     args_schema: Type[BaseModel] = SerpApiGoogleSearchToolSchema
     search_url: str = "https://serpapi.com/search"
 
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+
     def _run(
         self,
         q: str,
@@ -25,7 +28,7 @@ class SerpApiGoogleSearchTool(BaseTool):
             "engine": "google",
             "q": q,
             "tbs": tbs,
-            "api_key": serp_api_key,
+            "api_key": self.api_key,
         }
         headers = {
             'content-type': 'application/json'
