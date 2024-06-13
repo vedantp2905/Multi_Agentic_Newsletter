@@ -160,8 +160,8 @@ def main():
                 if loop is None:
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
-
-                genai.configure(api_key=os.environ[api_key])
+                
+                genai.configure(api_key=os.environ['AIzaSyCAx49R-1rsUTqlwtVP6gLLtyOVhQT5E20'])
                 
                 generation_config = {
 "temperature": 0.6,
