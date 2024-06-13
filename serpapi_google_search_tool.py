@@ -1,4 +1,5 @@
 import requests
+from app import serp_api_key
 
 from typing import Type, Any
 from pydantic.v1 import BaseModel, Field
@@ -24,7 +25,7 @@ class SerpApiGoogleSearchTool(BaseTool):
             "engine": "google",
             "q": q,
             "tbs": tbs,
-            "api_key": '1a0fb01413ef0451e26679d0fa8bc7117d94fda19fdc6f53f74aea0c6b93b41d',
+            "api_key": serp_api_key,
         }
         headers = {
             'content-type': 'application/json'
@@ -50,5 +51,3 @@ class SerpApiGoogleSearchTool(BaseTool):
         print(summary)
         
         return summary
-
-
