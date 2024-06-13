@@ -1,5 +1,3 @@
-# app.py
-
 import os
 import docx
 import streamlit as st
@@ -27,27 +25,27 @@ def generate_text(llm, topic, serpapi_key):
     )
 
     researcher_agent = Agent(
-    role='Newsletter Content Researcher',
-    goal='Search the latest top 5 developments on the given topic, find unique 5 URLs containing the developments, and scrape relevant information from these URLs.',
-    backstory=(
-        "An experienced researcher with strong skills in web scraping, fact-finding, and "
-        "analyzing recent trends to provide up-to-date information for high-quality newsletters."
-    ),
-    verbose=True,
-    allow_delegation=False,
-    llm=llm
-)
+        role='Newsletter Content Researcher',
+        goal='Search the latest top 5 developments on the given topic, find unique 5 URLs containing the developments, and scrape relevant information from these URLs.',
+        backstory=(
+            "An experienced researcher with strong skills in web scraping, fact-finding, and "
+            "analyzing recent trends to provide up-to-date information for high-quality newsletters."
+        ),
+        verbose=True,
+        allow_delegation=False,
+        llm=llm
+    )
 
     writer_agent = Agent(
-    role='Content Writer',
-    goal='Write detailed, engaging, and informative summaries of the developments found by the researcher.',
-    backstory=("An experienced writer with a background in journalism and content creation. "
-                "Skilled in crafting compelling narratives and distilling complex information into "
-                "accessible formats. Adept at conducting research and synthesizing insights for engaging content."),
-    verbose=True,
-    allow_delegation=False,
-    llm=llm
-)
+        role='Content Writer',
+        goal='Write detailed, engaging, and informative summaries of the developments found by the researcher.',
+        backstory=("An experienced writer with a background in journalism and content creation. "
+                    "Skilled in crafting compelling narratives and distilling complex information into "
+                    "accessible formats. Adept at conducting research and synthesizing insights for engaging content."),
+        verbose=True,
+        allow_delegation=False,
+        llm=llm
+    )
 
     reviewer_agent = Agent(
         role='Content Reviewer',
@@ -65,7 +63,7 @@ def generate_text(llm, topic, serpapi_key):
         agent=researcher_agent,
         expected_output=('A list of 5-6 recent developments with their respective website URLs. '
                          'Scraped content from all URLs that can be used further by the writer.'),
-        tools = [search_tool,scrape_tool]
+        tools=[search_tool, scrape_tool]
     )
 
     task_writer = Task(
