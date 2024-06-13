@@ -161,7 +161,7 @@ def main():
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
 
-                genai.configure(api_key=os.environ[api_key])
+                genai.configure(api_key=os.environ['AIzaSyARGWURdPdb2vdh5lPpTiaWp4BZUjbw7jk'])
                 
                 generation_config = {
 "temperature": 0.6,
@@ -182,7 +182,7 @@ def main():
             mod = 'Gemini'
         
         # User input for the blog topic
-        topic = st.text_input("Enter the blog topic:")
+        topic = st.text_input("Enter the newsletter topic:")
 
         if st.button("Generate Newsletter Content"):
             with st.spinner("Generating content..."):
