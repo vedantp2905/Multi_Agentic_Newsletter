@@ -3,8 +3,7 @@ python-docx
 crewai
 duckduckgo_search
 langchain-google-genai
-replicate
-chatopenai
+openai
 langchain-core
 pysqlite3-binary
 crewai-tools
