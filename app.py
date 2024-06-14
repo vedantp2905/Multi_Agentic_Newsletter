@@ -66,7 +66,7 @@ def generate_text(llm, topic, serp_api_key):
 
     researcher_agent = Agent(
         role='Newsletter Content Researcher',
-        goal='Search the latest top 5 developments on the given topic, find unique 5 URLs containing the developments, and scrape relevant information from these URLs.',
+        goal='Search the latest top 5 developments on the given topic, find unique 5 URLs containing the developments, collect relevant pictures for all, and scrape relevant information from these URLs.',
         backstory=(
             "An experienced researcher with strong skills in web scraping, fact-finding, and "
             "analyzing recent trends to provide up-to-date information for high-quality newsletters."
@@ -110,7 +110,8 @@ def generate_text(llm, topic, serp_api_key):
     
     task_researcher = Task(
         description=(f'Research and identify the top 5-6 developments on the topic of {topic} '
-                     'Scrape detailed content from relevant websites to gather comprehensive material.'),
+                     'Scrape detailed content from relevant websites to gather comprehensive material.'
+                     'Gather pictures for all the developments'),
         agent=researcher_agent,
         expected_output=('A list of 3-4 recent developments and 2 stories from more than a week ago with their respective website URLs. '
                          'Scraped content from all URLs that can be used further by the writer.'),
@@ -146,6 +147,8 @@ def generate_text(llm, topic, serp_api_key):
                 - Summarize each story or development in one interesting sentence.
             - Main content sections (5-6 developments/stories):
                 - Each story should have:
+                    - Headline
+                    - Relevant Picture
                     - A small introduction.
                     - Details presented in 3-4 bullet points.
                     - Explanation of why it matters or a call to action
