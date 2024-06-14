@@ -191,7 +191,7 @@ def main():
                     asyncio.set_event_loop(loop)
 
                 os.environ["OPENAI_API_KEY"] = api_key
-                llm = ChatOpenAI(temperature=0.6, max_tokens=3500)
+                llm = ChatOpenAI(temperature=0.6, max_tokens=2000)
                 print("Configured OpenAI model:", llm)
                 return llm
 
