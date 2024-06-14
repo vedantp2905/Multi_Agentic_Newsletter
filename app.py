@@ -110,10 +110,9 @@ def generate_text(llm, topic, serpapi_key):
     
     task_researcher = Task(
         description=(f'Research and identify the most interesting 5 stories on the topic of {topic} '
-                     'Make sure that at least 2 stories are from more than a week ago'
                      'Scrape detailed content from relevant websites to gather comprehensive material.'),
         agent=researcher_agent,
-        expected_output=('A list of 3 recent stories and 2 stories from more than a week ago with their respective website URLs. '
+        expected_output=('A list of recent 5 stories within last 2 weeks with their respective website URLs. '
                          'Scraped content from all URLs that can be used further by the writer.'),
         tools=[search_tool, scrape_tool]
     )
