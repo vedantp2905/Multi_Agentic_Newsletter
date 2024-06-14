@@ -160,7 +160,6 @@ def generate_text(llm, topic):
                 - Summarize each story or development in one interesting sentence.
             - Main content sections (5-6 developments/stories):
                 - Each story should have:
-                    - Relevant Image
                     - A small introduction.
                     - Main details presented in 3-4 bullet points.
                     - Explanation of why it matters or a call to action
@@ -193,7 +192,6 @@ def main():
             model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI'))
             api_key = st.text_input(f'Enter your API key', type="password")
             serp_api_key = st.text_input(f'Enter your SerpAPI key', type="password")
-            os.environ["SERPER_API_KEY"] = serp_api_key
             submitted = st.form_submit_button("Submit")
 
     if api_key and serp_api_key:
@@ -206,7 +204,7 @@ def main():
 
                 os.environ["OPENAI_API_KEY"] = api_key
                 llm = ChatOpenAI(temperature=0.6, max_tokens=3500)
-                print("Configured OpenAI model:", llm)
+                print("Configured OpenAI model")
                 return llm
 
             llm = asyncio.run(setup_OpenAI())
