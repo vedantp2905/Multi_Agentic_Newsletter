@@ -77,8 +77,6 @@ def generate_text(llm, topic):
                        {"website_url": "<URL of the webpage to scrape>"}""",
     )
     
-    search_Images = GoogleSerperAPIWrapper(type="images")
-
 
     researcher_agent = Agent(
         role='Newsletter Content Researcher',
