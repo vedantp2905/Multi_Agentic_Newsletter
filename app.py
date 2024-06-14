@@ -14,50 +14,60 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai import Agent, Task, Crew, Process
 from crewai_tools import SerperDevTool
 
-# Define your Serp API key
-serp_api_key='YOUR_SERP_API_KEY'
+serp_api_key=''
+class SerpApiGoogleSearchToolSchema(BaseModel):
+    q: str = Field(..., description="Parameter defines the query you want to search. You can use anything that you would use in a regular Google search. e.g. inurl:, site:, intitle:.")
+    tbs: str = Field("qdr:w2", description="Time filter to limit the search to the last two weeks.")
 
-# Define the schema and tool for image search
-class SerpApiGoogleImageSearchToolSchema(BaseModel):
-    q: str = Field(..., description="Parameter defines the query you want to search images for.")
-
-class SerpApiGoogleImageSearchTool(BaseTool):
-    name: str = "Google Image Search"
-    description: str = "Search Google for images"
-    args_schema: Type[BaseModel] = SerpApiGoogleImageSearchToolSchema
+class SerpApiGoogleSearchTool(BaseTool):
+    name: str = "Google Search"
+    description: str = "Search the internet"
+    args_schema: Type[BaseModel] = SerpApiGoogleSearchToolSchema
     search_url: str = "https://serpapi.com/search"
-
+    
     def _run(
         self,
         q: str,
+        tbs: str = "qdr:w2",
         **kwargs: Any,
     ) -> Any:
         payload = {
             "engine": "google",
             "q": q,
-            "tbm": "isch",  # Set the search type to images
+            "tbs": tbs,
             "api_key": serp_api_key,
         }
         headers = {
             'content-type': 'application/json'
         }
-
+    
         response = requests.get(self.search_url, headers=headers, params=payload)
         results = response.json()
-
-        images = []
-        if 'images_results' in results:
-            images = [img['original'] for img in results['images_results']]
-
-        return images
-
+    
+        summary = ""
+        if 'answer_box_list' in results:
+            summary += str(results['answer_box_list'])
+        elif 'answer_box' in results:
+            summary += str(results['answer_box'])
+        elif 'organic_results' in results:
+            summary += str(results['organic_results'])
+        elif 'sports_results' in results:
+            summary += str(results['sports_results'])
+        elif 'knowledge_graph' in results:
+            summary += str(results['knowledge_graph'])
+        elif 'top_stories' in results:
+            summary += str(results['top_stories'])
+        
+        print(summary)
+        
+        return summary
+    
 # Function to generate text based on topic
-def generate_text(llm, topic, serp_api_key):
+def generate_text(llm, topic, serpapi_key):
     inputs = {'topic': topic}
     search_tool = SerpApiGoogleSearchTool()
-    image_search_tool = SerpApiGoogleImageSearchTool()  # Include image search tool
-
-    # Enhance ScrapeWebsiteTool to filter content by date
+    
+# Enhance ScrapeWebsiteTool to filter content by date
     scrape_tool = ScrapeWebsiteTool(
         name="website_scraper",
         description="""Scrape content from web pages. Action Input should look like this:
@@ -66,7 +76,7 @@ def generate_text(llm, topic, serp_api_key):
 
     researcher_agent = Agent(
         role='Newsletter Content Researcher',
-        goal='Search the latest top 5 developments on the given topic, find unique 5 URLs containing the developments, collect relevant pictures for all, and scrape relevant information from these URLs.',
+        goal='Search the latest top 5 developments on the given topic, find unique 5 URLs containing the developments, and scrape relevant information from these URLs.',
         backstory=(
             "An experienced researcher with strong skills in web scraping, fact-finding, and "
             "analyzing recent trends to provide up-to-date information for high-quality newsletters."
@@ -110,8 +120,7 @@ def generate_text(llm, topic, serp_api_key):
     
     task_researcher = Task(
         description=(f'Research and identify the top 5-6 developments on the topic of {topic} '
-                     'Scrape detailed content from relevant websites to gather comprehensive material.'
-                     'Gather pictures for all the developments'),
+                     'Scrape detailed content from relevant websites to gather comprehensive material.'),
         agent=researcher_agent,
         expected_output=('A list of 3-4 recent developments and 2 stories from more than a week ago with their respective website URLs. '
                          'Scraped content from all URLs that can be used further by the writer.'),
@@ -147,17 +156,17 @@ def generate_text(llm, topic, serp_api_key):
                 - Summarize each story or development in one interesting sentence.
             - Main content sections (5-6 developments/stories):
                 - Each story should have:
-                    - Headline
-                    - Relevant Picture
+                    - Catchy headline
                     - A small introduction.
-                    - Details presented in 3-4 bullet points.
+                    - Main details presented in 3-4 bullet points.
                     - Explanation of why it matters or a call to action
-                    - Links to relevant sources or additional information.
+                    - Links to relevant sources or additional information. Make sure the links work and go to the correct page
             - Conclusion:
                 - Wrap up the newsletter by summarizing all content and providing a final thought or conclusion.
             """
         )
     )
+
 
     crew = Crew(
         agents=[researcher_agent, writer_agent, reviewer_agent, final_writer_agent],
@@ -167,10 +176,6 @@ def generate_text(llm, topic, serp_api_key):
     )
 
     result = crew.kickoff(inputs=inputs)
-
-    # Use the image search tool to find images related to the topic
-    images = image_search_tool.run(q=topic)
-    result['images'] = images
 
     return result
 
@@ -234,26 +239,13 @@ def main():
 
                 st.markdown(first_line)
                 st.markdown(remaining_content)
+
                 doc = Document()
 
                 doc.add_heading(topic, 0)
                 doc.add_paragraph(first_line)
                 doc.add_paragraph(remaining_content)
 
-                # Add images to the Word document
-                for image_url in generated_content['images']:
-                    try:
-                        # Download the image
-                        image_response = requests.get(image_url)
-                        if image_response.status_code == 200:
-                            # Add the image to the document
-                            image_data = BytesIO(image_response.content)
-                            doc.add_picture(image_data, width=docx.shared.Inches(4), height=docx.shared.Inches(3))
-                            doc.add_paragraph("")  # Add a blank paragraph after each image for spacing
-                    except Exception as e:
-                        st.warning(f"Failed to include image: {str(e)}")
-
-                # Save the document and provide download button
                 buffer = BytesIO()
                 doc.save(buffer)
                 buffer.seek(0)
@@ -267,5 +259,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-               
