@@ -15,8 +15,7 @@ from crewai import Agent, Task, Crew, Process
 from crewai_tools import SerperDevTool
 import pprint
 from langchain_community.utilities import GoogleSerperAPIWrapper
-from PIL import Image
-import urllib.request
+
 
 serp_api_key=''
 class SerpApiGoogleSearchToolSchema(BaseModel):
@@ -191,12 +190,6 @@ def generate_text(llm, topic):
     return result
 
 
-# Function to download images from URLs
-def download_image(image_url):
-    response = requests.get(image_url)
-    img = Image.open(BytesIO(response.content))
-    return img
-
 # Streamlit web application
 def main():
     st.header('AI Newsletter Content Generator')
@@ -264,14 +257,6 @@ def main():
                 doc.add_paragraph(first_line)
                 doc.add_paragraph(remaining_content)
 
-                # Assuming images are URLs in the generated content
-                image_urls = extract_image_urls(generated_content)
-                for image_url in image_urls:
-                    img = download_image(image_url)
-                    img_path = f'/tmp/{os.path.basename(image_url)}'
-                    img.save(img_path)
-                    doc.add_picture(img_path)
-
                 buffer = BytesIO()
                 doc.save(buffer)
                 buffer.seek(0)
@@ -282,14 +267,6 @@ def main():
                     file_name=f"{topic}.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 )
-
-def extract_image_urls(content):
-    # Function to extract image URLs from the generated content
-    image_urls = []
-    for line in content.split('\n'):
-        if 'http' in line and ('.jpg' in line or '.png' in line):
-            image_urls.append(line.strip())
-    return image_urls
 
 if __name__ == "__main__":
     main()
