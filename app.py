@@ -113,7 +113,9 @@ class SerpApiGoogleImagesSearchTool(BaseTool):
 # Function to generate text based on topic
 def generate_text(llm, topic):
     inputs = {'topic': topic}
+    
     search_tool = SerpApiGoogleSearchTool()
+    search_image = SerpApiGoogleImagesSearchTool()
     
 # Enhance ScrapeWebsiteTool to filter content by date
     scrape_tool = ScrapeWebsiteTool(
@@ -125,7 +127,7 @@ def generate_text(llm, topic):
 
     researcher_agent = Agent(
         role='Newsletter Content Researcher',
-        goal='Search the latest top 5 developments on the given topic, find unique 5 URLs containing the developments, and scrape relevant information from these URLs.',
+        goal='Search the latest top 5 stories on the given topic, find unique 5 URLs containing the stories, relevant image for each story, and scrape relevant information from these URLs.',
         backstory=(
             "An experienced researcher with strong skills in web scraping, fact-finding, and "
             "analyzing recent trends to provide up-to-date information for high-quality newsletters."
@@ -168,12 +170,14 @@ def generate_text(llm, topic):
     )
     
     task_researcher = Task(
-        description=(f'Research and identify the top 5-6 developments on the topic of {topic} '
-                     'Scrape detailed content from relevant websites to gather comprehensive material.'),
+        description=(f'Research and identify the most interesting 5 stories on the topic of {topic} '
+                     'Scrape detailed content from relevant websites to gather comprehensive material.'
+                     'Find relevant image for each story'),
         agent=researcher_agent,
         expected_output=('A list of 3-4 recent developments and 2 stories from more than a week ago with their respective website URLs. '
-                         'Scraped content from all URLs that can be used further by the writer.'),
-        tools=[search_tool, scrape_tool]
+                         'Scraped content from all URLs that can be used further by the writer.'
+                         'A relevant image for each story'),
+        tools=[search_tool, scrape_tool,search_image]
     )
 
     task_writer = Task(
@@ -205,6 +209,7 @@ def generate_text(llm, topic):
                 - Summarize each story or development in one interesting sentence.
             - Main content sections (5-6 developments/stories):
                 - Each story should have:
+                    - Image after title
                     - A small introduction.
                     - Main details presented in 3-4 bullet points.
                     - Explanation of why it matters or a call to action
