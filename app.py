@@ -1,23 +1,19 @@
 import os
-import docx
-import streamlit as st
-from docx import Document
-from io import BytesIO
-from crewai_tools import ScrapeWebsiteTool
 import asyncio
 import requests
 from typing import Type, Any
-from pydantic.v1 import BaseModel, Field
+from io import BytesIO
+import streamlit as st
+from pydantic import BaseModel, Field
+from docx import Document
+from crewai_tools import ScrapeWebsiteTool
 from crewai_tools.tools.base_tool import BaseTool
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
-from crewai import Agent, Task, Crew, Process
-from crewai_tools import SerperDevTool
-import pprint
-from langchain_community.utilities import GoogleSerperAPIWrapper
+from crewai import Agent, Task, Crew
 
-
-serp_api_key=''
+# Define SerpApi key (you should set this in your environment or through Streamlit input)
+serp_api_key = ''
 
 class SerpApiGoogleSearchToolSchema(BaseModel):
     q: str = Field(..., description="Parameter defines the query you want to search. You can use anything that you would use in a regular Google search. e.g. inurl:, site:, intitle:.")
@@ -29,22 +25,14 @@ class SerpApiGoogleSearchTool(BaseTool):
     args_schema: Type[BaseModel] = SerpApiGoogleSearchToolSchema
     search_url: str = "https://serpapi.com/search"
     
-    def _run(
-        self,
-        q: str,
-        tbs: str = "qdr:w2",
-        **kwargs: Any,
-    ) -> Any:
+    def _run(self, q: str, tbs: str = "qdr:w2", **kwargs: Any) -> Any:
         payload = {
             "engine": "google",
             "q": q,
             "tbs": tbs,
             "api_key": serp_api_key,
         }
-        headers = {
-            'content-type': 'application/json'
-        }
-    
+        headers = {'content-type': 'application/json'}
         response = requests.get(self.search_url, headers=headers, params=payload)
         results = response.json()
     
@@ -65,66 +53,54 @@ class SerpApiGoogleSearchTool(BaseTool):
         print(summary)
         
         return summary
- 
-# Schema for Google Images search parameters
+
 class SerpApiGoogleImagesSearchToolSchema(BaseModel):
     q: str = Field(..., description="Query for image search. e.g., 'cats', 'sunset'.")
     tbs: str = Field("qdr:w2", description="Time filter to limit the search to the last two weeks.")
 
-# Tool class for Google Images search
 class SerpApiGoogleImagesSearchTool(BaseTool):
     name: str = "Google Images Search"
     description: str = "Search the internet for images"
     args_schema: Type[BaseModel] = SerpApiGoogleImagesSearchToolSchema
     search_url: str = "https://serpapi.com/search"
     
-    def _run(
-        self,
-        q: str,
-        tbs: str = "qdr:w2",
-        **kwargs: Any,
-    ) -> Any:
+    def _run(self, q: str, tbs: str = "qdr:w2", **kwargs: Any) -> Any:
         payload = {
             "engine": "google_images",
             "q": q,
             "tbs": tbs,
             "api_key": serp_api_key,
         }
-        headers = {
-            'content-type': 'application/json'
-        }
-    
+        headers = {'content-type': 'application/json'}
         response = requests.get(self.search_url, headers=headers, params=payload)
         results = response.json()
     
         summary = ""
+        image_urls = []
         if 'images_results' in results:
             for image in results['images_results']:
                 summary += f"Title: {image.get('title')}\n"
                 summary += f"Source: {image.get('source')}\n"
                 summary += f"Link: {image.get('link')}\n"
                 summary += f"Thumbnail: {image.get('thumbnail')}\n\n"
+                image_urls.append(image.get('thumbnail'))
         
         print(summary)
         
-        return summary
+        return summary, image_urls
 
-    
-# Function to generate text based on topic
 def generate_text(llm, topic):
     inputs = {'topic': topic}
     
     search_tool = SerpApiGoogleSearchTool()
     search_image = SerpApiGoogleImagesSearchTool()
     
-# Enhance ScrapeWebsiteTool to filter content by date
     scrape_tool = ScrapeWebsiteTool(
         name="website_scraper",
         description="""Scrape content from web pages. Action Input should look like this:
                        {"website_url": "<URL of the webpage to scrape>"}""",
     )
     
-
     researcher_agent = Agent(
         role='Newsletter Content Researcher',
         goal='Search the latest top 5 stories on the given topic, find unique 5 URLs containing the stories, relevant image for each story, and scrape relevant information from these URLs.',
@@ -177,7 +153,7 @@ def generate_text(llm, topic):
         expected_output=('A list of 3-4 recent developments and 2 stories from more than a week ago with their respective website URLs. '
                          'Scraped content from all URLs that can be used further by the writer.'
                          'A relevant image for each story'),
-        tools=[search_tool, scrape_tool,search_image]
+        tools=[search_tool, scrape_tool, search_image]
     )
 
     task_writer = Task(
@@ -219,7 +195,6 @@ def generate_text(llm, topic):
         )
     )
 
-
     crew = Crew(
         agents=[researcher_agent, writer_agent, reviewer_agent, final_writer_agent],
         tasks=[task_researcher, task_writer, task_reviewer, task_final_writer],
@@ -231,12 +206,11 @@ def generate_text(llm, topic):
 
     return result
 
-
 # Streamlit web application
 def main():
     st.header('AI Newsletter Content Generator')
-    mod = None
     global serp_api_key
+    
     with st.sidebar:
         with st.form('Gemini/OpenAI'):
             model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI'))
@@ -246,27 +220,16 @@ def main():
 
     if api_key and serp_api_key:
         if model == 'OpenAI':
-            async def setup_OpenAI():
-                loop = asyncio.get_event_loop()
-                if loop is None:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-
+            async def setup_openai():
                 os.environ["OPENAI_API_KEY"] = api_key
                 llm = ChatOpenAI(temperature=0.6, max_tokens=3500)
                 print("Configured OpenAI model")
                 return llm
 
-            llm = asyncio.run(setup_OpenAI())
-            mod = 'OpenAI'
+            llm = asyncio.run(setup_openai())
 
         elif model == 'Gemini':
             async def setup_gemini():
-                loop = asyncio.get_event_loop()
-                if loop is None:
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
-
                 llm = ChatGoogleGenerativeAI(
                     model="gemini-1.5-flash",
                     verbose=True,
@@ -277,14 +240,13 @@ def main():
                 return llm
 
             llm = asyncio.run(setup_gemini())
-            mod = 'Gemini'
         
         topic = st.text_input("Enter the blog topic:")
 
         if st.button("Generate Newsletter Content"):
             with st.spinner("Generating content..."):
-                generated_content = generate_text(llm, topic)
-
+                generated_content, image_urls = generate_text(llm, topic)
+                
                 content_lines = generated_content.split('\n')
                 first_line = content_lines[0]
                 remaining_content = '\n'.join(content_lines[1:])
@@ -292,8 +254,11 @@ def main():
                 st.markdown(first_line)
                 st.markdown(remaining_content)
 
-                doc = Document()
+                # Display images
+                for image_url in image_urls:
+                    st.image(image_url)
 
+                doc = Document()
                 doc.add_heading(topic, 0)
                 doc.add_paragraph(first_line)
                 doc.add_paragraph(remaining_content)
