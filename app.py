@@ -249,7 +249,7 @@ def main():
 
         if st.button("Generate Newsletter Content"):
             with st.spinner("Generating content..."):
-                generated_content = generate_text(llm, topic, serp_api_key)
+                generated_content = generate_text(llm, topic)
 
                 content_lines = generated_content.split('\n')
                 first_line = content_lines[0]
