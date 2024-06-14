@@ -66,7 +66,7 @@ def generate_text(llm, topic, serpapi_key):
 
     researcher_agent = Agent(
         role='Newsletter Content Researcher',
-        goal='Search the latest top 5 stories on the given topic, find unique 5 URLs containing the stories, and scrape relevant information from these URLs.',
+        goal='Search for 5 stories on the given topic, find unique 5 URLs containing the stories, and scrape relevant information from these URLs.',
         backstory=(
             "An experienced researcher with strong skills in web scraping, fact-finding, and "
             "analyzing recent trends to provide up-to-date information for high-quality newsletters."
@@ -118,7 +118,7 @@ def generate_text(llm, topic, serpapi_key):
     )
 
     task_writer = Task(
-        description=('Write detailed summaries of the recent stories found by the researcher. '
+        description=('Write detailed summaries of the stories found by the researcher. '
                      'Ensure each summary is informative, engaging, and provides clear insights into the story.'),
         agent=writer_agent,
         expected_output=('Summarized content for all the stories, each summary being 150-200 words long, '
@@ -143,9 +143,8 @@ def generate_text(llm, topic, serpapi_key):
             - Introduction: A compelling hook sentence to engage readers and make the newsletter fun.
             - Contents section:
                 - Summarize each story in one interesting sentence.
-            - Main content sections (5 stories):
-                -Highlight one of the stories as the most interesitng one in the newsletter. Explicitly mention it as newsletters highlight 
-                
+            - Main content sections (1 highlight story and 4 other stories):
+                -Highlight one of the stories as the most interesitng one in the newsletter which you feel desevres to be the highlight. Explicitly mention it as newsletters highlight at the start of the main conetent section
                 - Each story should have:
                     - A small introduction.
                     - Details presented in 3-4 bullet points.
