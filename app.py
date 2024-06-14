@@ -154,6 +154,7 @@ def generate_text(llm, topic, serpapi_key):
             - Contents section:
                 - Summarize each story in one interesting sentence.
             - Main content sections (5 stories):
+                -Highlight one of the stories as the most interesitng one in the newsletter
                 - Each story should have:
                     - A small introduction.
                     - Details presented in 3-4 bullet points.
