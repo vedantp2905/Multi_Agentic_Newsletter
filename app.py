@@ -18,6 +18,7 @@ from langchain_community.utilities import GoogleSerperAPIWrapper
 
 
 serp_api_key=''
+
 class SerpApiGoogleSearchToolSchema(BaseModel):
     q: str = Field(..., description="Parameter defines the query you want to search. You can use anything that you would use in a regular Google search. e.g. inurl:, site:, intitle:.")
     tbs: str = Field("qdr:w2", description="Time filter to limit the search to the last two weeks.")
@@ -64,6 +65,50 @@ class SerpApiGoogleSearchTool(BaseTool):
         print(summary)
         
         return summary
+ 
+# Schema for Google Images search parameters
+class SerpApiGoogleImagesSearchToolSchema(BaseModel):
+    q: str = Field(..., description="Query for image search. e.g., 'cats', 'sunset'.")
+    tbs: str = Field("qdr:w2", description="Time filter to limit the search to the last two weeks.")
+
+# Tool class for Google Images search
+class SerpApiGoogleImagesSearchTool(BaseTool):
+    name: str = "Google Images Search"
+    description: str = "Search the internet for images"
+    args_schema: Type[BaseModel] = SerpApiGoogleImagesSearchToolSchema
+    search_url: str = "https://serpapi.com/search"
+    
+    def _run(
+        self,
+        q: str,
+        tbs: str = "qdr:w2",
+        **kwargs: Any,
+    ) -> Any:
+        payload = {
+            "engine": "google_images",
+            "q": q,
+            "tbs": tbs,
+            "api_key": serp_api_key,
+        }
+        headers = {
+            'content-type': 'application/json'
+        }
+    
+        response = requests.get(self.search_url, headers=headers, params=payload)
+        results = response.json()
+    
+        summary = ""
+        if 'images_results' in results:
+            for image in results['images_results']:
+                summary += f"Title: {image.get('title')}\n"
+                summary += f"Source: {image.get('source')}\n"
+                summary += f"Link: {image.get('link')}\n"
+                summary += f"Thumbnail: {image.get('thumbnail')}\n\n"
+        
+        print(summary)
+        
+        return summary
+
     
 # Function to generate text based on topic
 def generate_text(llm, topic):
