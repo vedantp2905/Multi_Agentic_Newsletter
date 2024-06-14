@@ -6,7 +6,7 @@ from io import BytesIO
 from crewai_tools import ScrapeWebsiteTool
 import streamlit as st
 from docx import Document
-from pydantic import BaseModel, Field
+from pydantic.v1 import BaseModel, Field
 from crewai_tools.tools.base_tool import BaseTool
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
