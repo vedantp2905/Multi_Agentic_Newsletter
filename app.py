@@ -77,12 +77,7 @@ def generate_text(llm, topic):
                        {"website_url": "<URL of the webpage to scrape>"}""",
     )
     
-    search_Images = GoogleSerperAPIWrapper(
-        type = "images",
-        name = "Google Images Search",
-        description = """Find images using Google Images. Action input shoudl look like this:
-                       {results = search.results("<Whatever image you want to search for>}"""
-    )
+    search_Images = GoogleSerperAPIWrapper(type="images")
 
 
     researcher_agent = Agent(
