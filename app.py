@@ -128,7 +128,7 @@ def generate_text(llm, topic):
         agent=researcher_agent,
         expected_output=('A list of 3-4 recent developments and 2 stories from more than a week ago with their respective website URLs. '
                          'Scraped content from all URLs that can be used further by the writer.'),
-        tools=[search_tool, scrape_tool,search_Images]
+        tools=[search_tool, scrape_tool]
     )
 
     task_writer = Task(
