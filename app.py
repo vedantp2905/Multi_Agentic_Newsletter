@@ -13,6 +13,10 @@ from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai import Agent, Task, Crew, Process
 from crewai_tools import SerperDevTool
+import pprint
+from langchain_community.utilities import GoogleSerperAPIWrapper
+from PIL import Image
+import urllib.request
 
 serp_api_key=''
 class SerpApiGoogleSearchToolSchema(BaseModel):
@@ -63,7 +67,7 @@ class SerpApiGoogleSearchTool(BaseTool):
         return summary
     
 # Function to generate text based on topic
-def generate_text(llm, topic, serpapi_key):
+def generate_text(llm, topic):
     inputs = {'topic': topic}
     search_tool = SerpApiGoogleSearchTool()
     
@@ -73,6 +77,14 @@ def generate_text(llm, topic, serpapi_key):
         description="""Scrape content from web pages. Action Input should look like this:
                        {"website_url": "<URL of the webpage to scrape>"}""",
     )
+    
+    search_Images = GoogleSerperAPIWrapper(
+        type = "images",
+        name = "Google Images Search",
+        description = """Find images using Google Images. Action input shoudl look like this:
+                       {results = search.results("<Whatever image you want to search for>}"""
+    )
+
 
     researcher_agent = Agent(
         role='Newsletter Content Researcher',
@@ -124,7 +136,7 @@ def generate_text(llm, topic, serpapi_key):
         agent=researcher_agent,
         expected_output=('A list of 3-4 recent developments and 2 stories from more than a week ago with their respective website URLs. '
                          'Scraped content from all URLs that can be used further by the writer.'),
-        tools=[search_tool, scrape_tool]
+        tools=[search_tool, scrape_tool,search_Images]
     )
 
     task_writer = Task(
@@ -156,11 +168,10 @@ def generate_text(llm, topic, serpapi_key):
                 - Summarize each story or development in one interesting sentence.
             - Main content sections (5-6 developments/stories):
                 - Each story should have:
-                    - Catchy headline
+                    - Relevant Image
                     - A small introduction.
                     - Main details presented in 3-4 bullet points.
                     - Explanation of why it matters or a call to action
-                    - Links to relevant sources or additional information. Make sure the links work and go to the correct page
             - Conclusion:
                 - Wrap up the newsletter by summarizing all content and providing a final thought or conclusion.
             """
@@ -180,6 +191,12 @@ def generate_text(llm, topic, serpapi_key):
     return result
 
 
+# Function to download images from URLs
+def download_image(image_url):
+    response = requests.get(image_url)
+    img = Image.open(BytesIO(response.content))
+    return img
+
 # Streamlit web application
 def main():
     st.header('AI Newsletter Content Generator')
@@ -190,6 +207,7 @@ def main():
             model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI'))
             api_key = st.text_input(f'Enter your API key', type="password")
             serp_api_key = st.text_input(f'Enter your SerpAPI key', type="password")
+            os.environ["SERPER_API_KEY"] = serp_api_key
             submitted = st.form_submit_button("Submit")
 
     if api_key and serp_api_key:
@@ -246,6 +264,14 @@ def main():
                 doc.add_paragraph(first_line)
                 doc.add_paragraph(remaining_content)
 
+                # Assuming images are URLs in the generated content
+                image_urls = extract_image_urls(generated_content)
+                for image_url in image_urls:
+                    img = download_image(image_url)
+                    img_path = f'/tmp/{os.path.basename(image_url)}'
+                    img.save(img_path)
+                    doc.add_picture(img_path)
+
                 buffer = BytesIO()
                 doc.save(buffer)
                 buffer.seek(0)
@@ -256,6 +282,14 @@ def main():
                     file_name=f"{topic}.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 )
+
+def extract_image_urls(content):
+    # Function to extract image URLs from the generated content
+    image_urls = []
+    for line in content.split('\n'):
+        if 'http' in line and ('.jpg' in line or '.png' in line):
+            image_urls.append(line.strip())
+    return image_urls
 
 if __name__ == "__main__":
     main()
