@@ -122,7 +122,8 @@ def generate_text(llm, topic, serpapi_key):
                      'Ensure each summary is informative, engaging, and provides clear insights into the story.'),
         agent=writer_agent,
         expected_output=('Summarized content for all the stories, each summary being 150-200 words long, '
-                         'with clear and concise information.')
+                         'with clear and concise information.'
+                         'Links to original source found by researcher and any additional information if needed.')
     )
 
     task_reviewer = Task(
@@ -130,7 +131,8 @@ def generate_text(llm, topic, serpapi_key):
                      'Ensure that the content is free from errors and meets the publication standards.'),
         agent=reviewer_agent,
         expected_output=('Reviewed content with suggestions for improvements, if any. '
-                         'Final versions of summaries that are ready for inclusion in the newsletter.')
+                         'Final versions of summaries that are ready for inclusion in the newsletter.'
+                         'Verify the links are opening to correct pages')
     )
 
     task_final_writer = Task(
