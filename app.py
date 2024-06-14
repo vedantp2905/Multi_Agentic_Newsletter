@@ -4,7 +4,7 @@ import requests
 from typing import Type, Any
 from io import BytesIO
 import streamlit as st
-from pydantic import BaseModel, Field
+from pydantic.v1 import BaseModel, Field
 from docx import Document
 from crewai_tools import ScrapeWebsiteTool
 from crewai_tools.tools.base_tool import BaseTool
