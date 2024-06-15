@@ -192,7 +192,7 @@ def main():
 
                 os.environ["OPENAI_API_KEY"] = api_key
                 llm = ChatOpenAI(temperature=0.6, max_tokens=2000)
-                print("Configured OpenAI model:", llm)
+                print("OpenAI Configured")
                 return llm
 
             llm = asyncio.run(setup_OpenAI())
