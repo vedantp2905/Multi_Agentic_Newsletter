@@ -54,7 +54,7 @@ class SerpApiGoogleSearchTool(BaseTool):
         print(summary)
         
         return summary
-
+   
 def generate_text(llm, topic, serpapi_key):
     inputs = {'topic': topic}
     search_tool = SerpApiGoogleSearchTool()
@@ -239,12 +239,12 @@ def main():
                 doc.save(buffer)
                 buffer.seek(0)
 
-                st.download_button(
-                    label="Download as Word Document",
-                    data=buffer,
-                    file_name=f"{topic}.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                )
+    st.download_button(
+        label="Download as Word Document",
+        data=buffer,
+        file_name=f"{topic}.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
 
 if __name__ == "__main__":
     main()
