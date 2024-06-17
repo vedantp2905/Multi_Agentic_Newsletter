@@ -173,8 +173,6 @@ def generate_text(llm, topic, serpapi_key):
 
 def main():
     
-    buffer = None
-    
     st.header('AI Newsletter Content Generator')
     mod = None
     global serp_api_key
@@ -244,8 +242,8 @@ def main():
 
     st.download_button(
         label="Download as Word Document",
-        data=buffer,
-        file_name=f"{topic}.docx",
+        data=generated_content,
+        file_name=f"{topic}.txt",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
 
