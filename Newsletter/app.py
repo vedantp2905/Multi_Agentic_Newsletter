@@ -1,3 +1,6 @@
+#Add st.cache
+
+
 import os
 import asyncio
 import requests
@@ -170,11 +173,12 @@ def generate_text(llm, topic, serpapi_key):
 
     return result
 
-
+st.cache(persist=True)
 def main():
     st.header('AI Newsletter Content Generator')
     mod = None
     global serp_api_key
+    
     with st.sidebar:
         with st.form('Gemini/OpenAI'):
             model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI'))
@@ -196,7 +200,6 @@ def main():
                 return llm
 
             llm = asyncio.run(setup_OpenAI())
-            mod = 'OpenAI'
 
         elif model == 'Gemini':
             async def setup_gemini():
@@ -215,7 +218,6 @@ def main():
                 return llm
 
             llm = asyncio.run(setup_gemini())
-            mod = 'Gemini'
         
         topic = st.text_input("Enter the newsletter topic:")
 
