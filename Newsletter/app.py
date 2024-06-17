@@ -171,12 +171,33 @@ def generate_text(llm, topic, serpapi_key):
 
     return result
 
+def formatting(generated_content,topic):
+    content_lines = generated_content.split('\n')
+    first_line = content_lines[0]
+    remaining_content = '\n'.join(content_lines[1:])
+
+    st.markdown(first_line)
+    st.markdown(remaining_content)
+
+    doc = Document()
+
+    doc.add_heading(topic, 0)
+    doc.add_paragraph(first_line)
+    doc.add_paragraph(remaining_content)
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    
+    return buffer
+
 def main():
     
     st.header('AI Newsletter Content Generator')
     mod = None
+    
     global serp_api_key
-    global generated_content
+    
     with st.sidebar:
         with st.form('Gemini/OpenAI'):
             model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI'))
@@ -221,29 +242,15 @@ def main():
 
         if st.button("Generate Newsletter Content"):
             with st.spinner("Generating content..."):
+                
                 generated_content = generate_text(llm, topic, serp_api_key)
-
-                content_lines = generated_content.split('\n')
-                first_line = content_lines[0]
-                remaining_content = '\n'.join(content_lines[1:])
-
-                st.markdown(first_line)
-                st.markdown(remaining_content)
-
-                doc = Document()
-
-                doc.add_heading(topic, 0)
-                doc.add_paragraph(first_line)
-                doc.add_paragraph(remaining_content)
-
-                buffer = BytesIO()
-                doc.save(buffer)
-                buffer.seek(0)
-
+    
+    buffer = formatting(generated_content,topic)
+    
     st.download_button(
         label="Download as Word Document",
-        data=generated_content,
-        file_name=f"{topic}.txt",
+        data=buffer,
+        file_name=f"{topic}.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
 
