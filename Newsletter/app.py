@@ -14,7 +14,6 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai import Agent, Task, Crew
 
 serp_api_key = ''
-generated_content = ''
 
 class SerpApiGoogleSearchToolSchema(BaseModel):
     q: str = Field(..., description="Parameter defines the query you want to search. You can use anything that you would use in a regular Google search. e.g. inurl:, site:, intitle:.")
@@ -172,32 +171,11 @@ def generate_text(llm, topic, serpapi_key):
 
     return result
 
-def formatting(generated_content,topic):
-    content_lines = generated_content.split('\n')
-    first_line = content_lines[0]
-    remaining_content = '\n'.join(content_lines[1:])
-
-    st.markdown(first_line)
-    st.markdown(remaining_content)
-
-    doc = Document()
-
-    doc.add_heading(topic, 0)
-    doc.add_paragraph(first_line)
-    doc.add_paragraph(remaining_content)
-
-    buffer = BytesIO()
-    doc.save(buffer)
-    buffer.seek(0)
-    
-    return buffer
-
 def main():
     
     st.header('AI Newsletter Content Generator')
     mod = None
     
-    global generated_content
     global serp_api_key
     
     with st.sidebar:
@@ -240,16 +218,31 @@ def main():
 
             llm = asyncio.run(setup_gemini())
         
-    topic = st.text_input("Enter the newsletter topic:")
+        topic = st.text_input("Enter the newsletter topic:")
 
-    if st.button("Generate Newsletter Content"):
+        if st.button("Generate Newsletter Content"):
             with st.spinner("Generating content..."):
-                
                 generated_content = generate_text(llm, topic, serp_api_key)
+
+                content_lines = generated_content.split('\n')
+                first_line = content_lines[0]
+                remaining_content = '\n'.join(content_lines[1:])
+
+                st.markdown(first_line)
+                st.markdown(remaining_content)
+
+                doc = Document()
+
+                doc.add_heading(topic, 0)
+                doc.add_paragraph(first_line)
+                doc.add_paragraph(remaining_content)
+
+                buffer = BytesIO()
+                doc.save(buffer)
+                buffer.seek(0)
     
-    buffer = formatting(generated_content,topic)
     
-    st.download_button(
+                st.download_button(
         label="Download as Word Document",
         data=buffer,
         file_name=f"{topic}.docx",
