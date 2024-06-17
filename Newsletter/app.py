@@ -55,7 +55,6 @@ class SerpApiGoogleSearchTool(BaseTool):
         
         return summary
 
-@cache   
 def generate_text(llm, topic, serpapi_key):
     inputs = {'topic': topic}
     search_tool = SerpApiGoogleSearchTool()
