@@ -1,6 +1,3 @@
-#Add st.cache
-
-
 import os
 import asyncio
 import requests
@@ -8,6 +5,7 @@ from typing import Type, Any
 from io import BytesIO
 from crewai_tools import ScrapeWebsiteTool
 import streamlit as st
+from streamlit import cache
 from docx import Document
 from pydantic.v1 import BaseModel, Field
 from crewai_tools.tools.base_tool import BaseTool
@@ -56,7 +54,8 @@ class SerpApiGoogleSearchTool(BaseTool):
         print(summary)
         
         return summary
-    
+
+@cache   
 def generate_text(llm, topic, serpapi_key):
     inputs = {'topic': topic}
     search_tool = SerpApiGoogleSearchTool()
