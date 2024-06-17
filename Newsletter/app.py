@@ -172,6 +172,9 @@ def generate_text(llm, topic, serpapi_key):
     return result
 
 def main():
+    
+    buffer = None
+    
     st.header('AI Newsletter Content Generator')
     mod = None
     global serp_api_key
