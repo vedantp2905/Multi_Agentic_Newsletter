@@ -14,6 +14,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from crewai import Agent, Task, Crew
 
 serp_api_key = ''
+generated_content = ''
 
 class SerpApiGoogleSearchToolSchema(BaseModel):
     q: str = Field(..., description="Parameter defines the query you want to search. You can use anything that you would use in a regular Google search. e.g. inurl:, site:, intitle:.")
@@ -196,6 +197,7 @@ def main():
     st.header('AI Newsletter Content Generator')
     mod = None
     
+    global generated_content
     global serp_api_key
     
     with st.sidebar:
