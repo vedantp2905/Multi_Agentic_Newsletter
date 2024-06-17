@@ -240,9 +240,9 @@ def main():
 
             llm = asyncio.run(setup_gemini())
         
-        topic = st.text_input("Enter the newsletter topic:")
+    topic = st.text_input("Enter the newsletter topic:")
 
-        if st.button("Generate Newsletter Content"):
+    if st.button("Generate Newsletter Content"):
             with st.spinner("Generating content..."):
                 
                 generated_content = generate_text(llm, topic, serp_api_key)
