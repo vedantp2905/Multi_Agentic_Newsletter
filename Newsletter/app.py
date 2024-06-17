@@ -176,7 +176,7 @@ def main():
     st.header('AI Newsletter Content Generator')
     mod = None
     global serp_api_key
-    
+    global generated_content
     with st.sidebar:
         with st.form('Gemini/OpenAI'):
             model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI'))
