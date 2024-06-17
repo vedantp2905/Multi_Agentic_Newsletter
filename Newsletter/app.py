@@ -173,7 +173,7 @@ def generate_text(llm, topic, serpapi_key):
 
     return result
 
-st.cache(persist=True)
+st.cache_data
 def main():
     st.header('AI Newsletter Content Generator')
     mod = None
