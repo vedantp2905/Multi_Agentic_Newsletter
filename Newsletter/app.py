@@ -1,5 +1,6 @@
 import os
 import asyncio
+from langchain_groq import ChatGroq
 import requests
 from typing import Type, Any
 from io import BytesIO
@@ -179,8 +180,8 @@ def main():
     global serp_api_key
     
     with st.sidebar:
-        with st.form('Gemini/OpenAI'):
-            model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI'))
+        with st.form('Gemini/OpenAI/Groq'):
+            model = st.radio('Choose Your LLM', ('Gemini', 'OpenAI','Groq'))
             api_key = st.text_input(f'Enter your API key', type="password")
             serp_api_key = st.text_input(f'Enter your SerpAPI key', type="password")
             submitted = st.form_submit_button("Submit")
@@ -199,6 +200,8 @@ def main():
                 return llm
 
             llm = asyncio.run(setup_OpenAI())
+            mod = 'Gemini'
+
 
         elif model == 'Gemini':
             async def setup_gemini():
@@ -217,7 +220,25 @@ def main():
                 return llm
 
             llm = asyncio.run(setup_gemini())
-        
+            mod = 'Gemini'
+
+            
+        elif model == 'Groq':
+            async def setup_groq():
+                loop = asyncio.get_event_loop()
+                if loop is None:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+
+                llm = ChatGroq(
+                    api_key = api_key,
+                    model = 'llama3-70b-8192'
+                )
+                return llm
+
+            llm = asyncio.run(setup_groq())
+            mod = 'Groq'
+
         topic = st.text_input("Enter the newsletter topic:")
 
         if st.button("Generate Newsletter Content"):
