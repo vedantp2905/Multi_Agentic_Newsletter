@@ -1,9 +1,0 @@
-streamlit
-python-docx
-crewai
-langchain-google-genai
-openai
-langchain-core
-pysqlite3-binary
-crewai-tools
-langchain-groq
