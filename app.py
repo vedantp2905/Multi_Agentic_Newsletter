@@ -57,7 +57,9 @@ class SerpApiGoogleSearchTool(BaseTool):
         return summary
    
 def generate_text(llm, topic, serpapi_key):
+    
     inputs = {'topic': topic}
+    
     search_tool = SerpApiGoogleSearchTool()
     
     scrape_tool = ScrapeWebsiteTool(
