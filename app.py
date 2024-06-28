@@ -62,11 +62,7 @@ def generate_text(llm, topic, serpapi_key):
     
     search_tool = SerpApiGoogleSearchTool()
     
-    scrape_tool = ScrapeWebsiteTool(
-        name="website_scraper",
-        description="""Scrape content from web pages. Action Input should look like this:
-                       {"website_url": "<URL of the webpage to scrape>"}""",
-    )
+    scrape_tool = ScrapeWebsiteTool()
 
     researcher_agent = Agent(
         role='Newsletter Content Researcher',
@@ -77,6 +73,7 @@ def generate_text(llm, topic, serpapi_key):
         ),
         verbose=True,
         allow_delegation=False,
+        max_iter = 5,
         llm=llm
     )
 
@@ -88,6 +85,7 @@ def generate_text(llm, topic, serpapi_key):
                    "accessible formats. Adept at conducting research and synthesizing insights for engaging content."),
         verbose=True,
         allow_delegation=False,
+        max_iter = 5,
         llm=llm
     )
 
@@ -98,6 +96,7 @@ def generate_text(llm, topic, serpapi_key):
                    "known for their keen eye for detail and commitment to maintaining the highest quality standards in published content."),
         verbose=True,
         allow_delegation=False,
+        max_iter = 5,
         llm=llm
     )
     
@@ -109,7 +108,8 @@ def generate_text(llm, topic, serpapi_key):
                    "With a keen eye for detail and a deep understanding of audience engagement, this writer excels in transforming raw content into polished, professional-grade newsletters that captivate readers and deliver clear, valuable insights."),
         verbose=True,
         allow_delegation=False,
-        llm=llm
+        llm=llm,
+        max_iter = 5
     )
     
     task_researcher = Task(
