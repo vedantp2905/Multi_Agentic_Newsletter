@@ -114,7 +114,8 @@ def generate_text(llm, topic, serpapi_key):
     
     task_researcher = Task(
         description=(f'Research and identify the most interesting 5 stories on the topic of {topic} '
-                     'Scrape detailed content from relevant websites to gather comprehensive material.'),
+                     'Scrape detailed content from relevant websites to gather comprehensive material.'
+                     'If unable to scrape a URL, find a new URL and scrape it.'),
         agent=researcher_agent,
         expected_output=('A list of recent 5 stories within last 2 weeks with their respective website URLs. '
                          'Scraped content from all URLs that can be used further by the writer.'),
@@ -197,7 +198,7 @@ def main():
                     asyncio.set_event_loop(loop)
 
                 os.environ["OPENAI_API_KEY"] = api_key
-                llm = ChatOpenAI(temperature=0.6, max_tokens=2000)
+                llm = ChatOpenAI(model='gpt-4-turbo',temperature=0.6, max_tokens=2000,api_key=api_key)
                 print("OpenAI Configured")
                 return llm
 
