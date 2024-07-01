@@ -4,7 +4,7 @@ crewai
 langchain-google-genai
 openai
 langchain-core
-pysqlite3-binary
+pysqlite3-binary==3.35.0
 crewai-tools
 langchain-groq
 chromadb
