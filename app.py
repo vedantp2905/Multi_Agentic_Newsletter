@@ -179,7 +179,6 @@ def main():
     
     st.header('AI Newsletter Content Generator')
     mod = None
-    
     global serp_api_key
     
     # Initialize session state
@@ -255,30 +254,31 @@ def main():
             with st.spinner("Generating content..."):
                 st.session_state.generated_content = generate_text(llm, topic,serp_api_key)
 
-                content_lines = st.session_state.generated_content.split('\n')
-                first_line = content_lines[0]
-                remaining_content = '\n'.join(content_lines[1:])
+        if st.session_state.generated_content:
+            content_lines = st.session_state.generated_content.split('\n')
+            first_line = content_lines[0]
+            remaining_content = '\n'.join(content_lines[1:])
 
-                st.markdown(first_line)
-                st.markdown(remaining_content)
+            st.markdown(first_line)
+            st.markdown(remaining_content)
 
-                doc = Document()
+            doc = Document()
 
-                doc.add_heading(topic, 0)
-                doc.add_paragraph(first_line)
-                doc.add_paragraph(remaining_content)
+            doc.add_heading(topic, 0)
+            doc.add_paragraph(first_line)
+            doc.add_paragraph(remaining_content)
 
-                buffer = BytesIO()
-                doc.save(buffer)
-                buffer.seek(0)
-    
-    
-                st.download_button(
-        label="Download as Word Document",
-        data=buffer,
-        file_name=f"{topic}.docx",
-        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )
+            buffer = BytesIO()
+            doc.save(buffer)
+            buffer.seek(0)
+
+
+            st.download_button(
+    label="Download as Word Document",
+    data=buffer,
+    file_name=f"{topic}.docx",
+    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+)
 
 if __name__ == "__main__":
     main()
