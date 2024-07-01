@@ -8,4 +8,3 @@ pysqlite3-binary
 crewai-tools
 langchain-groq
 chromadb
-embedchain
