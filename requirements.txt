@@ -7,5 +7,4 @@ langchain-core
 pysqlite3-binary
 crewai-tools
 langchain-groq
-embedchain
 chromadb
