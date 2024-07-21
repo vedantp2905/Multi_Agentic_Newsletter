@@ -369,18 +369,14 @@ def main():
                 st.session_state.generated_content = generate_text(llm, topic,serp_api_key)
 
         if st.session_state.generated_content:
-            content_lines = st.session_state.generated_content.split('\n')
-            first_line = content_lines[0]
-            remaining_content = '\n'.join(content_lines[1:])
-
-            st.markdown(first_line)
-            st.markdown(remaining_content)
+            
+            st.markdown(st.session_state.generated_content)
 
             doc = Document()
 
             doc.add_heading(topic, 0)
-            doc.add_paragraph(first_line)
-            doc.add_paragraph(remaining_content)
+            doc.add_paragraph(st.session_state.generated_content)
+            
 
             buffer = BytesIO()
             doc.save(buffer)
