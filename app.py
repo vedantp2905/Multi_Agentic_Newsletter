@@ -204,9 +204,9 @@ def generate_text(llm, topic, serpapi_key):
     )
     
     task_researcher = Task(
-        description=(f'Research and identify the most interesting 5 stories on the topic of {topic} '
-                     'Scrape detailed content from relevant websites to gather comprehensive material.'
-                     'If unable to scrape a URL, find a new URL and scrape it.'),
+        description=(f'Research and identify the most interesting 5 stories on the topic of {topic} and their URLs'
+                     'Scrape detailed content from relevant URLs to gather comprehensive material.'
+                     ),
         agent=researcher_agent,
         expected_output=('A list of recent 5 stories within last 2 weeks with their respective website URLs. '
                          'Scraped content from all URLs that can be used further by the writer.'),
@@ -247,7 +247,7 @@ def generate_text(llm, topic, serpapi_key):
                     - A small introduction.
                     - Details presented in 3-4 bullet points.
                     - Explanation of why it matters or a call to action
-                    - Links to original source found by researcher and any additional information if needed.
+                    - Links to original source : <Link>
             - Conclusion:
                 - Wrap up the newsletter by summarizing all content and providing a final thought or conclusion.
             """
